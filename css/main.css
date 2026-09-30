@@ -1127,3 +1127,22 @@ body.sb-collapsed .nav-item.active .nav-icon svg {
 #loadingScreen .progress-fill, #loader .progress-fill, .loading-bar-fill {
     background: linear-gradient(90deg, #5FB4C4, #4A9FB0) !important;
 }
+
+/* Loading screen — TradeVault palette (broad match) */
+#loadingScreen, #loader, .loading-screen, #loadingOverlay, .loader-overlay,
+#splash, #loading, .loader, #appLoader, .loading {
+    background: #06141B !important;
+}
+#loadingScreen *, #loader *, .loading-screen *, #loading *, .loader *, #appLoader * {
+    color: #9BA8AB !important;
+}
+#loadingScreen h1, #loader h1, #loading h1, .loader h1,
+.loading-logo, .loader-logo, #loadingScreen .logo, #loader .logo {
+    color: #CCD0CF !important;
+}
+.loader-spinner, .loading-spinner, .spinner,
+#loadingScreen .spinner, #loader .spinner, #loading .spinner {
+    border: 3px solid #253745 !important;
+    border-top-color: #5FB4C4 !important;
+    background: transparent !important;
+}
