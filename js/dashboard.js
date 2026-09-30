@@ -1,4 +1,4 @@
-// Dashboard Module — professional chart system v2
+// Dashboard Module — professional chart system
 
 const CHART_COLORS = {
     green: '#3FA87A',
