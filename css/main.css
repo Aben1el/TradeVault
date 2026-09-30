@@ -1103,3 +1103,27 @@ body.sb-collapsed .nav-item .nav-icon svg {
 body.sb-collapsed .nav-item.active .nav-icon svg {
     opacity: 1;
 }
+
+/* ============ LOADING SCREEN — TRADEVAULT PALETTE ============ */
+#loadingScreen, #loader, .loading-screen, #loadingOverlay, .loader-overlay, #splash {
+    background: #06141B !important;
+}
+#loadingScreen *, #loader *, .loading-screen *, #loadingOverlay *, #splash * {
+    color: #9BA8AB !important;
+}
+#loadingScreen h1, #loader h1, .loading-screen h1,
+#loadingScreen .logo, #loader .logo, .loading-logo, .loader-logo {
+    color: #CCD0CF !important;
+}
+.loader-spinner, .loading-spinner, .spinner,
+#loadingScreen .spinner, #loader .spinner {
+    border: 3px solid #253745 !important;
+    border-top-color: #5FB4C4 !important;
+    background: transparent !important;
+}
+#loadingScreen .progress, #loader .progress, .loading-bar {
+    background: #253745 !important;
+}
+#loadingScreen .progress-fill, #loader .progress-fill, .loading-bar-fill {
+    background: linear-gradient(90deg, #5FB4C4, #4A9FB0) !important;
+}
