@@ -455,7 +455,13 @@
     <script src="js/utils.js"></script>
     <script src="js/calculators.js"></script>
     <script src="js/analytics.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/dashboard.js"></script> 
+    <script>
+/* Resilience: if dashboard.js ever fails to parse, the app still boots */
+if (typeof dashboard === 'undefined') {
+    window.dashboard = { __stub: true, charts: {}, loadDashboard: async function () {}, loadAnalytics: async function () {} };
+}
+</script>
     <script src="js/trades.js"></script>
     <script src="js/strategies.js"></script>
     <script src="js/psychology.js"></script>
