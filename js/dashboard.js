@@ -1,12 +1,22 @@
 // Dashboard Module — professional chart system v2
 
-const CHART_COLORS = {
-    green: '#2ebd85',
-    red: '#e5536b',
-    gray: '#5b5b66',
-    accent: '#7c7ff2',
-    indigo: ['#7c7ff2', '#9aa0f5', '#6f74e8', '#8b5cf6', '#a78bfa', '#5f64d6']
-};
+// TradeVault chart defaults
+if (window.Chart) {
+    Chart.defaults.color = '#9BA8AB';
+    Chart.defaults.borderColor = 'rgba(74,92,106,0.25)';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.boxWidth = 8;
+    Chart.defaults.plugins.legend.labels.padding = 16;
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17,33,45,0.95)';
+    Chart.defaults.plugins.tooltip.borderColor = 'rgba(74,92,106,0.5)';
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { family: 'Inter', weight: '600', size: 12 };
+    Chart.defaults.plugins.tooltip.bodyFont = { family: 'Inter', size: 11 };
+    Chart.defaults.plugins.tooltip.padding = 10;
+}
 
 // Draws win-rate % in the middle of the doughnut
 const centerTextPlugin = {
