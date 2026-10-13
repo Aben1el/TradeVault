@@ -641,21 +641,35 @@ if (typeof dashboard === 'undefined') {
             document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
         }
   <script>
-/* Loading-screen watchdog: guarantees exit even if another script errors */
+<script>
+/* Loading-screen watchdog v3 — selector-agnostic guaranteed exit */
 (function () {
     var done = false;
-    function killLoader() {
+    function fade(el) {
+        if (!el || el.dataset.tvKilled) return;
+        el.dataset.tvKilled = '1';
+        el.style.transition = 'opacity .4s ease';
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+        setTimeout(function () { el.style.display = 'none'; }, 420);
+    }
+    function kill() {
         if (done) return; done = true;
-        document.querySelectorAll('#loadingScreen, #loader, .loading-screen, #loadingOverlay, .loader-overlay, #splash').forEach(function (el) {
-            el.style.transition = 'opacity .45s ease';
-            el.style.opacity = '0';
-            el.style.pointerEvents = 'none';
-            setTimeout(function () { el.style.display = 'none'; }, 480);
+        /* 1) anything with load/loader/preloader/splash in its id or class */
+        document.querySelectorAll('[id*="load" i], [class*="load" i], [id*="preloader" i], [class*="preloader" i], [id*="splash" i], [class*="splash" i]').forEach(function (el) {
+            var cs = getComputedStyle(el);
+            if (cs.position === 'fixed' || cs.position === 'absolute') fade(el);
+        });
+        /* 2) failsafe: ANY fixed full-viewport overlay still visible */
+        document.querySelectorAll('body *').forEach(function (el) {
+            var cs = getComputedStyle(el);
+            if (cs.position === 'fixed' && cs.display !== 'none' && cs.opacity !== '0' &&
+                el.offsetHeight >= window.innerHeight - 2 && el.offsetWidth >= window.innerWidth - 2) fade(el);
         });
         document.body.classList.add('tv-loaded');
     }
-    window.addEventListener('load', function () { setTimeout(killLoader, 700); });
-    setTimeout(killLoader, 4000);   /* hard failsafe — never infinite */
+    window.addEventListener('load', function () { setTimeout(kill, 700); });
+    setTimeout(kill, 4000);
 })();
 </script>
 </body>
