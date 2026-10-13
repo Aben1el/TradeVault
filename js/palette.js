@@ -1,6 +1,9 @@
-// ============ TradeVault Moonstone Runtime Patch ============
+// ============ TradeVault Moonstone Runtime Patch v2 ============
 (function () {
-    // ---- 1. Favicon fix (relative path = never 404s on renamed repos) ----
+    // ---- 0. Load upgrade pack ----
+    (function () { var s = document.createElement('script'); s.src = 'js/upgrade.js'; document.head.appendChild(s); })();
+
+    // ---- 1. Favicon fix (relative path) ----
     (function fixFavicon() {
         var link = document.querySelector('link[rel~="icon"]');
         if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
@@ -8,12 +11,21 @@
         link.href = 'Images/favicon.png?v=6';
     })();
 
-    // ---- 2. Small hard overrides ----
+    // ---- 2. Hard overrides + Daylight light theme + mobile polish ----
     var ov = document.createElement('style');
-    ov.textContent = '.btn-primary, .btn-primary:hover { color: #0B0D10 !important; } ::selection { background: rgba(217,224,231,.25); color: #0B0D10; }';
+    ov.textContent = [
+        '.btn-primary, .btn-primary:hover { color: #0B0D10 !important; }',
+        '::selection { background: rgba(217,224,231,.25); color: #0B0D10; }',
+        /* Daylight — Moonstone light theme */
+        'html[data-theme="light"] { --bg-primary:#EEF1F4; --bg-secondary:#F7F9FA; --bg-tertiary:#DDE3E8; --bg-card:rgba(255,255,255,0.8); --bg-glass:rgba(247,249,250,0.7); --text-primary:#2A3138; --text-secondary:#5A636B; --text-tertiary:#6B737D; --border-color:rgba(107,115,125,0.28); --border-hover:#6B737D; --accent-primary:#4A5259; --accent-secondary:#6B737D; --accent-gradient:linear-gradient(135deg,#7D858C 0%,#5A636B 100%); }',
+        'html[data-theme="light"] .btn-primary, html[data-theme="light"] .btn-primary:hover { color: #F7F9FA !important; }',
+        'html[data-theme="light"] ::selection { background: rgba(107,115,125,.25); color: #2A3138; }',
+        /* Mobile polish */
+        '@media (max-width:640px){ .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;} #tradesTable{min-width:680px;} .modal{width:96vw;max-height:92vh;} .filters-bar{flex-wrap:wrap;} .filters-bar select,.filters-bar input[type="date"]{flex:1;min-width:46%;} }'
+    ].join('\n');
     document.head.appendChild(ov);
 
-    // ---- 3. Color mapping: purple / teal / old-slate  ->  Moonstone ----
+    // ---- 3. Color mapping -> Moonstone ----
     var PAIRS = [
         [/rgba\(\s*99\s*,\s*102\s*,\s*241/gi, 'rgba(217, 224, 231'],
         [/rgba\(\s*139\s*,\s*92\s*,\s*246/gi, 'rgba(107, 115, 125'],
@@ -35,7 +47,6 @@
         [/#9BA8AB/gi, '#A6AEB6'], [/#CCD0CF/gi, '#D9E0E7']
     ];
     function fix(s) { return PAIRS.reduce(function (out, p) { return out.replace(p[0], p[1]); }, s); }
-
     function walk(rules) {
         for (var i = 0; i < rules.length; i++) {
             var r = rules[i];
@@ -48,7 +59,6 @@
     }
     function patchSheet(sh) { try { walk(sh.cssRules); } catch (e) {} }
     function patchAll() { for (var i = 0; i < document.styleSheets.length; i++) patchSheet(document.styleSheets[i]); }
-
     function patchInline() {
         document.querySelectorAll('[style]').forEach(function (el) {
             var cur = el.getAttribute('style'); var nt = fix(cur);
@@ -59,12 +69,9 @@
             if (v) { var nt = fix(v); if (nt !== v) s.setAttribute('stop-color', nt); }
         });
     }
-
     function run() { patchAll(); patchInline(); }
     if (document.readyState === 'complete') { setTimeout(run, 200); setTimeout(run, 1200); }
     else window.addEventListener('load', function () { setTimeout(run, 200); setTimeout(run, 1200); });
-
-    // Patch <style> tags injected later by other modules
     new MutationObserver(function (muts) {
         muts.forEach(function (m) {
             m.addedNodes.forEach(function (n) {
