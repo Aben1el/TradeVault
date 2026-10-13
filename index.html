@@ -632,15 +632,16 @@ if (typeof dashboard === 'undefined') {
             if (dropProfile) dropProfile.onclick = () => { dropdown.classList.remove('open'); location.href = 'profile.html'; };
         });
 
-        function initScrollReveal() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); }
-                });
-            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        }
-  <script>
+       function initScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+try { initScrollReveal(); } catch (e) {}
+</script>
 <script>
 /* Loading-screen watchdog v3 — selector-agnostic guaranteed exit */
 (function () {
@@ -655,12 +656,10 @@ if (typeof dashboard === 'undefined') {
     }
     function kill() {
         if (done) return; done = true;
-        /* 1) anything with load/loader/preloader/splash in its id or class */
         document.querySelectorAll('[id*="load" i], [class*="load" i], [id*="preloader" i], [class*="preloader" i], [id*="splash" i], [class*="splash" i]').forEach(function (el) {
             var cs = getComputedStyle(el);
             if (cs.position === 'fixed' || cs.position === 'absolute') fade(el);
         });
-        /* 2) failsafe: ANY fixed full-viewport overlay still visible */
         document.querySelectorAll('body *').forEach(function (el) {
             var cs = getComputedStyle(el);
             if (cs.position === 'fixed' && cs.display !== 'none' && cs.opacity !== '0' &&
@@ -668,7 +667,8 @@ if (typeof dashboard === 'undefined') {
         });
         document.body.classList.add('tv-loaded');
     }
-    window.addEventListener('load', function () { setTimeout(kill, 700); });
+    if (document.readyState === 'complete') setTimeout(kill, 700);
+    else window.addEventListener('load', function () { setTimeout(kill, 700); });
     setTimeout(kill, 4000);
 })();
 </script>
