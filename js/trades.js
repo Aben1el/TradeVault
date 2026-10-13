@@ -1,27 +1,23 @@
-// ============ TradeVault Trades Module v2 — single unified flow ============
+// ============ TradeVault Trades Module v3 — grades + unified flow ============
 (function () {
     const st = document.createElement('style');
     st.textContent = `
         .tf-sec { margin: 1.1rem 0 .6rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); }
         .tf-sec small { color: var(--text-tertiary); text-transform: none; letter-spacing: 0; }
-        .tf-calc { padding: .6rem .9rem; border-radius: 12px; background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.25); font-size: .78rem; color: var(--text-secondary); margin-bottom: .9rem; }
+        .tf-calc { padding: .6rem .9rem; border-radius: 12px; background: rgba(217,224,231,.06); border: 1px solid rgba(107,115,125,.35); font-size: .78rem; color: var(--text-secondary); margin-bottom: .9rem; }
         .tf-mistakes { display: flex; gap: .9rem; flex-wrap: wrap; margin: .4rem 0 .2rem; }
         .tf-mk { display: flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--text-secondary); cursor: pointer; }
-        .tf-mk input { accent-color: #6366f1; }
+        .tf-mk input { accent-color: #D9E0E7; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
         @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
     `;
     document.head.appendChild(st);
 
     const trades = {
-        filters: { search: '', strategy: 'all', result: 'all', session: 'all', dir: 'all', from: '', to: '' },
+        filters: { search: '', strategy: 'all', result: 'all', session: 'all', dir: 'all', grade: 'all', from: '', to: '' },
         page: 1, perPage: 10,
 
-        async all() { 
-            let t = await db.getAllTrades(); 
-            if (window.tvTradeFilterFn) t = t.filter(window.tvTradeFilterFn); 
-            return t; 
-        },
+        async all() { let t = await db.getAllTrades(); if (window.tvTradeFilterFn) t = t.filter(window.tvTradeFilterFn); return t; },
 
         applyFilters(list) {
             const f = this.filters;
@@ -32,6 +28,7 @@
                 if (f.result === 'loss' && !(t.profitLoss < 0)) return false;
                 if (f.session !== 'all' && t.session !== f.session) return false;
                 if (f.dir !== 'all' && t.direction !== f.dir) return false;
+                if (f.grade !== 'all' && (t.tradeGrade || '') !== f.grade) return false;
                 if (f.from && new Date(t.entryDate) < new Date(f.from)) return false;
                 if (f.to && new Date(t.entryDate) > new Date(f.to + 'T23:59:59')) return false;
                 return true;
@@ -40,6 +37,7 @@
 
         async loadTrades() {
             this.ensureFilters();
+            this.ensureHeader();
             const list = this.applyFilters(await this.all()).sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate));
             const jg = document.getElementById('journalGrid');
             if (jg) jg.innerHTML = list.length ? list.slice(0, 12).map(t => this.cardHTML(t)).join('') : '<div class="empty-state"><h3>No trades yet</h3><p>Start building your trading history and your performance insights will appear here.</p></div>';
@@ -47,26 +45,38 @@
             const pages = Math.max(1, Math.ceil(list.length / this.perPage));
             if (this.page > pages) this.page = pages;
             const slice = list.slice((this.page - 1) * this.perPage, this.page * this.perPage);
-            if (tb) tb.innerHTML = slice.length ? slice.map(t => this.rowHTML(t)).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text-tertiary);">No trades match your filters.</td></tr>';
+            if (tb) tb.innerHTML = slice.length ? slice.map(t => this.rowHTML(t)).join('') : '<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--text-tertiary);">No trades match your filters.</td></tr>';
             const pg = document.getElementById('tradesPagination');
             if (pg) pg.innerHTML = pages > 1 ? `<button class="btn btn-text" ${this.page === 1 ? 'disabled' : ''} onclick="trades.goto(${this.page - 1})">←</button><span style="font-size:.8rem;color:var(--text-secondary);">Page ${this.page} / ${pages}</span><button class="btn btn-text" ${this.page === pages ? 'disabled' : ''} onclick="trades.goto(${this.page + 1})">→</button>` : '';
         },
         goto(p) { this.page = p; this.loadTrades(); },
 
+        ensureHeader() {
+            const thr = document.querySelector('#tradesTable thead tr');
+            if (!thr || thr.querySelector('th[data-grade]')) return;
+            const res = [...thr.children].find(th => /result/i.test(th.textContent));
+            const th = document.createElement('th'); th.textContent = 'Grade'; th.dataset.grade = '1';
+            if (res) thr.insertBefore(th, res); else thr.appendChild(th);
+        },
+
         cardHTML(t) {
+            const g = t.tradeGrade ? `<span class="grade-badge grade-${t.tradeGrade}">${t.tradeGrade}</span>` : '';
             return `<div class="trade-card ${t.profitLoss >= 0 ? 'win' : 'loss'}" onclick="trades.showTradeDetail(${t.id})">
-                <div class="trade-card-header"><span class="trade-symbol">${t.symbol}</span><span class="trade-pl ${t.profitLoss >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(t.profitLoss)}</span></div>
+                <div class="trade-card-header"><span class="trade-symbol">${t.symbol} ${g}</span><span class="trade-pl ${t.profitLoss >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(t.profitLoss)}</span></div>
                 <div class="trade-card-body"><div class="trade-meta"><span class="badge ${t.direction === 'long' ? 'badge-long' : 'badge-short'}">${t.direction}</span><span>${t.strategy || 'No strategy'}</span><span>${t.session || ''}</span></div></div>
                 <div class="trade-card-footer"><span>${formatDate(t.entryDate)}</span><span class="${t.profitLoss >= 0 ? 'text-success' : 'text-danger'}">${t.profitLoss >= 0 ? 'WIN' : 'LOSS'}</span></div></div>`;
         },
         rowHTML(t) {
+            const g = t.tradeGrade || '';
             return `<tr style="cursor:pointer" onclick="trades.showTradeDetail(${t.id})">
                 <td>${formatDate(t.entryDate)}</td><td><strong>${t.symbol}</strong></td>
                 <td><span class="badge ${t.direction === 'long' ? 'badge-long' : 'badge-short'}">${t.direction}</span></td>
                 <td>${t.entryPrice ?? '—'}</td><td>${t.exitPrice ?? '—'}</td>
                 <td class="${t.profitLoss >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(t.profitLoss)}</td>
                 <td>${t.rMultiple ?? '—'}R</td><td>${t.strategy || '—'}</td>
-                <td><span class="badge ${t.profitLoss >= 0 ? 'badge-long' : 'badge-short'}">${t.profitLoss >= 0 ? 'WIN' : 'LOSS'}</span></td></tr>`;
+                <td>${g ? `<span class="grade-badge grade-${g}">${g}</span>` : '—'}</td>
+                <td><span class="badge ${t.profitLoss >= 0 ? 'badge-long' : 'badge-short'}">${t.profitLoss >= 0 ? 'WIN' : 'LOSS'}</span></td>
+                <td><button class="table-action-btn" title="Edit" onclick="event.stopPropagation();trades.showTradeModal(${t.id})">✎</button> <button class="table-action-btn" title="Delete" onclick="event.stopPropagation();trades.deleteTrade(${t.id})">🗑</button></td></tr>`;
         },
 
         ensureFilters() {
@@ -80,13 +90,14 @@
                 <input type="text" id="tradeSearch" placeholder="Search symbol, strategy, tag…">
                 <select id="filterStrategy"><option value="all">All Strategies</option></select>
                 <select id="filterResult"><option value="all">Win & Loss</option><option value="win">Wins only</option><option value="loss">Losses only</option></select>
+                <select id="filterGrade"><option value="all">All Grades</option><option>A</option><option>B</option><option>C</option><option>D</option><option>F</option></select>
                 <select id="filterSession"><option value="all">All Sessions</option><option>London</option><option>New York</option><option>Asian</option></select>
                 <select id="filterDir"><option value="all">Long & Short</option><option value="long">Long</option><option value="short">Short</option></select>
                 <input type="date" id="filterFrom" title="From date">
                 <input type="date" id="filterTo" title="To date">`);
             const bind = (id, key) => { const el = document.getElementById(id); if (el) el.oninput = () => { this.filters[key] = el.value; this.page = 1; this.loadTrades(); }; };
             bind('tradeSearch', 'search'); bind('filterStrategy', 'strategy'); bind('filterResult', 'result');
-            bind('filterSession', 'session'); bind('filterDir', 'dir'); bind('filterFrom', 'from'); bind('filterTo', 'to');
+            bind('filterGrade', 'grade'); bind('filterSession', 'session'); bind('filterDir', 'dir'); bind('filterFrom', 'from'); bind('filterTo', 'to');
             (async () => {
                 const all = await this.all();
                 const strs = [...new Set(all.map(t => t.strategy).filter(Boolean))];
@@ -191,7 +202,7 @@
             document.getElementById('tfShots').onchange = e => { prev.innerHTML = thumbs + [...e.target.files].map(() => `<div class="skel" style="width:64px;height:48px;"></div>`).join(''); };
             const btn = document.getElementById('tfSave');
             btn.onclick = async () => {
-                if (btn.disabled) return;               // ← one submission per click
+                if (btn.disabled) return;
                 btn.disabled = true; btn.textContent = 'Saving…';
                 try { await this.save(form, t, existing); } finally { btn.disabled = false; btn.textContent = t ? 'Save Changes' : 'Add Trade'; }
             };
@@ -236,7 +247,7 @@
                 ${row('Date', formatDate(t.entryDate))}${row('Session', t.session)}${row('Timeframe', t.timeframe)}${row('Entry', t.entryPrice)}${row('Stop', t.stopLoss)}${row('Target', t.takeProfit)}${row('Exit', t.exitPrice)}${row('Size', t.positionSize)}${row('Leverage', t.leverage)}${row('Fees', t.fees)}${row('Swap', t.swap)}${row('P&L', `<span class="${t.profitLoss >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(t.profitLoss)}</span>`)}${row('R', t.rMultiple)}
               </div></div>
               <div class="trade-detail-section"><h4>Strategy & Mind</h4><div class="trade-detail-grid">
-                ${row('Strategy', t.strategy)}${row('Setup', t.setupType)}${row('Condition', t.marketCondition)}${row('Entry reason', t.entryReason)}${row('Exit reason', t.exitReason)}${row('Before', t.emotionBefore)}${row('During', t.emotionDuring)}${row('After', t.emotionAfter)}${row('Confidence', t.confidence)}${row('Discipline', t.discipline)}${row('Mistakes', t.mistakes || 'None')}${row('Rules broken', t.ruleBroken ? '⚠️ YES' : '✅ No')}
+                ${row('Strategy', t.strategy)}${row('Setup', t.setupType)}${row('Condition', t.marketCondition)}${row('Entry reason', t.entryReason)}${row('Exit reason', t.exitReason)}${row('Before', t.emotionBefore)}${row('During', t.emotionDuring)}${row('After', t.emotionAfter)}${row('Confidence', t.confidence)}${row('Discipline', t.discipline)}${row('Mistakes', t.mistakes || 'None')}${row('Rules broken', t.ruleBroken ? '⚠️ YES' : '✅ No')}${row('Grade', t.tradeGrade || '—')}
               </div></div>
               ${t.notes ? `<div class="trade-detail-section"><h4>Journal</h4><p style="white-space:pre-wrap;font-size:.85rem;color:var(--text-secondary);">${t.notes}</p></div>` : ''}
               ${t.screenshots && t.screenshots.length ? `<div class="trade-detail-section"><h4>Screenshots</h4><div style="display:flex;gap:.6rem;flex-wrap:wrap;">${t.screenshots.map(u => `<img src="${u}" style="width:110px;height:80px;object-fit:cover;border-radius:10px;cursor:pointer;" onclick="window.open('${u}')">`).join('')}</div></div>` : ''}
@@ -249,7 +260,7 @@
 
         async exportCSV() {
             const list = await this.all();
-            const cols = ['entryDate', 'symbol', 'direction', 'entryPrice', 'exitPrice', 'stopLoss', 'takeProfit', 'positionSize', 'profitLoss', 'rMultiple', 'strategy', 'session', 'timeframe', 'emotionBefore', 'discipline', 'tags'];
+            const cols = ['entryDate', 'symbol', 'direction', 'entryPrice', 'exitPrice', 'stopLoss', 'takeProfit', 'positionSize', 'profitLoss', 'rMultiple', 'tradeGrade', 'strategy', 'session', 'timeframe', 'emotionBefore', 'discipline', 'tags'];
             const csv = [cols.join(',')].concat(list.map(t => cols.map(c => `"${(t[c] ?? '').toString().replace(/"/g, '""')}"`).join(','))).join('\n');
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
