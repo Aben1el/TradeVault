@@ -1,7 +1,7 @@
-// ============ TradeVault Plans: Free vs Pro vs Owner v3 ============
+// ============ TradeVault Plans: Free vs Pro vs Owner v4 (Chapa) ============
 (function () {
     const FREE_TRADE_LIMIT = 50;
-    const STRIPE_LINK = ''; // ← paste your Stripe Payment Link here when ready
+    const PRICE_LABEL = '3 ETB';
 
     const FREE_FEATS = [
         { t: 'Up to ' + FREE_TRADE_LIMIT + ' trades', ok: 1 },
@@ -24,6 +24,7 @@
         { t: 'Early access to new features', ok: 1 }
     ];
     const featHTML = list => `<ul class="plan-feats">` + list.map(f => `<li class="${f.ok ? '' : 'no'}">${f.t}</li>`).join('') + `</ul>`;
+    const pricePro = () => `<div class="plan-price">3 <small>ETB · one-time (test price)</small></div>`;
 
     const st = document.createElement('style');
     st.textContent = `
@@ -101,7 +102,7 @@
                     <div class="plan-cards">
                       <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>${featHTML(FREE_FEATS)}
                         <button class="btn btn-secondary" onclick="location.href='auth.html'">Start Free</button></div>
-                      <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>${featHTML(PRO_FEATS)}
+                      <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4>${pricePro()}${featHTML(PRO_FEATS)}
                         <button class="btn btn-primary" onclick="tvPlan.showUpgrade()">Get Pro</button></div>
                     </div>`;
                     anchor.before(sec);
@@ -109,7 +110,6 @@
             }
         },
 
-        /* ---------- plan chooser on first login ---------- */
         showChooser() {
             const ov = document.getElementById('modalOverlay');
             if (!ov || ov.classList.contains('active')) return;
@@ -119,7 +119,7 @@
                 <div class="plan-cards">
                   <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>${featHTML(FREE_FEATS)}
                     <button class="btn btn-secondary" id="chFree" style="width:100%;">Continue Free</button></div>
-                  <div class="plan-card2 pro"><span class="plan-tag">RECOMMENDED</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>${featHTML(PRO_FEATS)}
+                  <div class="plan-card2 pro"><span class="plan-tag">RECOMMENDED</span><h4>Pro</h4>${pricePro()}${featHTML(PRO_FEATS)}
                     <button class="btn btn-primary" id="chPro" style="width:100%;">Go Pro / I have a code</button></div>
                 </div>
               </div></div>`;
@@ -136,15 +136,46 @@
             };
         },
 
+        /* ---------- CHAPA ---------- */
+        async chapaPay(btn) {
+            if (!window.tvClient || !tvClient.functions) return showToast('Payment system not ready', 'warning');
+            if (btn) { btn.disabled = true; btn.textContent = 'Creating checkout…'; }
+            let data = null, error = null;
+            try { const r = await tvClient.functions.invoke('chapa-init'); data = r.data; error = r.error; } catch (e) { error = e; }
+            if (btn) { btn.disabled = false; btn.textContent = 'Pay ' + PRICE_LABEL + ' with Chapa'; }
+            if (error || !data || !data.checkout_url) return showToast('Chapa checkout failed: ' + ((error && error.message) || (data && data.error) || 'unknown'), 'error');
+            localStorage.setItem('tv_chapa_tx', data.tx_ref);
+            window.open(data.checkout_url, '_blank');
+            showToast('Complete payment in the new tab, then press Verify');
+            const vf = document.getElementById('proVerifyBtn');
+            if (vf) vf.style.display = '';
+        },
+
+        async chapaVerify(tx) {
+            const txRef = tx || localStorage.getItem('tv_chapa_tx');
+            if (!txRef) return showToast('No pending payment found', 'warning');
+            let data = null, error = null;
+            try { const r = await tvClient.functions.invoke('chapa-verify', { body: { tx_ref: txRef } }); data = r.data; error = r.error; } catch (e) { error = e; }
+            if (!error && data && data.ok) {
+                localStorage.removeItem('tv_chapa_tx');
+                this.plan = 'pro'; localStorage.setItem('tv_plan', 'pro');
+                showToast('Payment confirmed — welcome to Pro ⭐');
+                setTimeout(() => location.reload(), 900);
+            } else {
+                showToast('Not confirmed yet. If you paid, wait a few seconds and press Verify again.', 'warning');
+            }
+        },
+
         showUpgrade(feature) {
             const ov = document.getElementById('modalOverlay');
             if (!ov || ov.classList.contains('active')) return;
+            const pending = localStorage.getItem('tv_chapa_tx');
             ov.innerHTML = `<div class="modal" style="max-width:660px;">
               <div class="modal-header"><h2>${feature ? feature + ' is a Pro feature' : 'TradeVault Plans'}</h2><button class="modal-close" onclick="app.closeModal()">✕</button></div>
               <div class="modal-body">
                 <div class="plan-cards">
                   <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>${featHTML(FREE_FEATS)}</div>
-                  <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>${featHTML(PRO_FEATS)}</div>
+                  <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4>${pricePro()}${featHTML(PRO_FEATS)}</div>
                 </div>
                 <div class="form-group"><label>Have a Pro code?</label>
                   <div style="display:flex;gap:.5rem;">
@@ -154,10 +185,13 @@
                 </div>
               </div>
               <div class="modal-footer">
+                <button class="btn btn-secondary" id="proVerifyBtn" style="${pending ? '' : 'display:none;'}">I have paid — Verify</button>
                 <button class="btn btn-secondary" onclick="app.closeModal()">Later</button>
-                <button class="btn btn-primary" id="proBuyBtn">Get Pro — $9/mo</button>
+                <button class="btn btn-primary" id="proBuyBtn">Pay ${PRICE_LABEL} with Chapa</button>
               </div></div>`;
             ov.classList.add('active');
+            document.getElementById('proBuyBtn').onclick = () => this.chapaPay(document.getElementById('proBuyBtn'));
+            document.getElementById('proVerifyBtn').onclick = () => this.chapaVerify();
             document.getElementById('proRedeemBtn').onclick = async () => {
                 const code = document.getElementById('proCodeInput').value.trim().toUpperCase();
                 if (!code) return showToast('Enter a code first', 'warning');
@@ -173,10 +207,6 @@
                     showToast(this.plan === 'owner' ? 'OWNER tier activated 👑' : 'Welcome to TradeVault Pro ⭐');
                     setTimeout(() => location.reload(), 900);
                 } else showToast('Invalid or already-used code', 'error');
-            };
-            document.getElementById('proBuyBtn').onclick = () => {
-                if (STRIPE_LINK) window.open(STRIPE_LINK, '_blank');
-                else showToast('Card payments launch soon — use a Pro code for now', 'warning');
             };
         }
     };
@@ -202,7 +232,7 @@
         }
     }
 
-    /* ---------- lock Pro visuals for free users ---------- */
+    /* ---------- locks + repaint ---------- */
     new MutationObserver(() => {
         gates();
         const pdf = document.getElementById('wkPdf');
@@ -220,6 +250,14 @@
     document.addEventListener('click', () => setTimeout(() => tvPlan.paint(), 150), true);
 
     function boot() {
+        /* Chapa callback: site reopened after payment → auto-verify */
+        const params = new URLSearchParams(location.search);
+        if (params.get('chapa') === '1' || params.get('tx_ref')) {
+            const tx = params.get('tx_ref') || localStorage.getItem('tv_chapa_tx');
+            history.replaceState(null, '', location.pathname);
+            showToast('Checking your payment with Chapa…');
+            setTimeout(() => tvPlan.chapaVerify(tx), 1500);
+        }
         tvPlan.refresh().then(() => {
             gates();
             tvPlan.paint();
