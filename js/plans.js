@@ -1,22 +1,45 @@
-// ============ TradeVault Plans: Free vs Pro v2 ============
+// ============ TradeVault Plans: Free vs Pro vs Owner v3 ============
 (function () {
     const FREE_TRADE_LIMIT = 50;
     const STRIPE_LINK = ''; // ← paste your Stripe Payment Link here when ready
+
+    const FREE_FEATS = [
+        { t: 'Up to ' + FREE_TRADE_LIMIT + ' trades', ok: 1 },
+        { t: 'Basic journal & charts', ok: 1 },
+        { t: 'CSV import & full export', ok: 0 },
+        { t: 'PDF & weekly auto-reviews', ok: 0 },
+        { t: 'Grade analytics', ok: 0 },
+        { t: 'Funded dashboard & multi-account', ok: 0 },
+        { t: 'Priority support', ok: 0 }
+    ];
+    const PRO_FEATS = [
+        { t: 'Unlimited trades', ok: 1 },
+        { t: 'Full journal: screenshots & psychology', ok: 1 },
+        { t: 'Funded dashboard & unlimited accounts', ok: 1 },
+        { t: 'CSV import & full data export', ok: 1 },
+        { t: 'PDF reports & weekly auto-review', ok: 1 },
+        { t: 'Grade analytics & mistake tracking', ok: 1 },
+        { t: 'All 12+ performance charts', ok: 1 },
+        { t: 'PRO badge & priority support', ok: 1 },
+        { t: 'Early access to new features', ok: 1 }
+    ];
+    const featHTML = list => `<ul class="plan-feats">` + list.map(f => `<li class="${f.ok ? '' : 'no'}">${f.t}</li>`).join('') + `</ul>`;
 
     const st = document.createElement('style');
     st.textContent = `
         .plan-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
         @media (max-width: 640px) { .plan-cards { grid-template-columns: 1fr; } }
-        .plan-card2 { border: 1px solid var(--border-color); border-radius: 16px; padding: 1.2rem; background: var(--bg-card); position: relative; }
-        .plan-card2.pro { border-color: #D9E0E7; box-shadow: 0 0 0 1px rgba(217,224,231,.35), 0 12px 32px rgba(0,0,0,.35); }
+        .plan-card2 { border: 1px solid var(--border-color); border-radius: 16px; padding: 1.2rem; background: var(--bg-card); position: relative; opacity: .92; }
+        .plan-card2.pro { opacity: 1; border-color: #D9E0E7; box-shadow: 0 0 0 1px rgba(217,224,231,.35), 0 12px 32px rgba(0,0,0,.35); transform: scale(1.02); }
         .plan-tag { position: absolute; top: -10px; right: 14px; background: linear-gradient(135deg,#D9E0E7,#6B737D); color: #0B0D10; font-size: .62rem; font-weight: 800; padding: .15rem .55rem; border-radius: 100px; letter-spacing: .06em; }
         .plan-price { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
         .plan-price small { font-size: .72rem; color: var(--text-tertiary); font-weight: 600; }
         .plan-feats { list-style: none; padding: 0; margin: .8rem 0; font-size: .8rem; color: var(--text-secondary); display: grid; gap: .45rem; }
         .plan-feats li::before { content: '✓ '; color: #3FA87A; font-weight: 700; }
-        .plan-feats li.no { opacity: .55; }
+        .plan-feats li.no { opacity: .45; }
         .plan-feats li.no::before { content: '— '; color: var(--text-tertiary); }
         .pro-badge { background: linear-gradient(135deg,#D9E0E7,#6B737D); color: #0B0D10; font-size: .6rem; font-weight: 800; padding: .12rem .5rem; border-radius: 100px; letter-spacing: .08em; margin-left: .5rem; vertical-align: middle; }
+        .owner-badge { background: transparent; border: 1px solid #D9E0E7; color: #D9E0E7; font-size: .6rem; font-weight: 800; padding: .12rem .5rem; border-radius: 100px; letter-spacing: .08em; margin-left: .5rem; vertical-align: middle; }
         .lock-teaser { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; min-height: 220px; text-align: center; color: var(--text-secondary); }
         #tvUpgradeBtn { width: 100%; margin-top: .5rem; min-height: 34px; font-size: .75rem; }
         .tv-pricing { max-width: 760px; margin: 4rem auto; padding: 0 1.5rem; text-align: center; }
@@ -28,12 +51,14 @@
 
     const tvPlan = {
         plan: localStorage.getItem('tv_plan') || 'free',
-        isPro() { return this.plan === 'pro'; },
+        hasSession: false,
+        isPro() { return this.plan === 'pro' || this.plan === 'owner'; },
 
         async refresh() {
             if (!window.tvClient) return;
             try {
                 const { data: s } = await tvClient.auth.getSession();
+                this.hasSession = !!s.session;
                 if (!s.session) { this.plan = 'free'; return this.paint(); }
                 const { data: p } = await tvClient.from('profiles').select('plan').eq('id', s.session.user.id).single();
                 this.plan = (p && p.plan) || 'free';
@@ -43,13 +68,14 @@
         },
 
         paint() {
-            /* --- sidebar footer: PRO badge or Upgrade button --- */
             const foot = document.querySelector('.sidebar-footer');
             if (foot) {
+                const oldBadge = foot.querySelector('.pro-badge, .owner-badge');
+                if (oldBadge && oldBadge.className !== (this.plan === 'owner' ? 'owner-badge' : 'pro-badge')) oldBadge.remove();
                 if (this.isPro()) {
-                    if (!foot.querySelector('.pro-badge')) {
+                    if (!foot.querySelector('.pro-badge, .owner-badge')) {
                         const nameEl = foot.querySelector('strong, .user-name, div div');
-                        if (nameEl) nameEl.insertAdjacentHTML('afterend', '<span class="pro-badge">PRO</span>');
+                        if (nameEl) nameEl.insertAdjacentHTML('afterend', this.plan === 'owner' ? '<span class="owner-badge">OWNER</span>' : '<span class="pro-badge">PRO</span>');
                     }
                     const ub = document.getElementById('tvUpgradeBtn');
                     if (ub) ub.remove();
@@ -58,14 +84,13 @@
                     document.getElementById('tvUpgradeBtn').onclick = () => this.showUpgrade();
                 }
             }
-            /* --- settings about line --- */
             const about = [...document.querySelectorAll('#settings h3')].find(h => /about/i.test(h.textContent));
             if (about && !document.getElementById('planLine')) {
+                const label = this.plan === 'owner' ? 'OWNER 👑' : this.isPro() ? 'PRO ⭐' : 'Free';
                 about.parentElement.insertAdjacentHTML('beforeend',
-                    `<p id="planLine" style="font-size:.78rem;color:var(--text-secondary);margin-top:.4rem;">Current plan: <strong>${this.isPro() ? 'PRO ⭐' : 'Free'}</strong> · <a href="#" id="planUpgradeLink" style="color:var(--text-primary);text-decoration:underline;">${this.isPro() ? 'Manage' : 'Upgrade'}</a></p>`);
+                    `<p id="planLine" style="font-size:.78rem;color:var(--text-secondary);margin-top:.4rem;">Current plan: <strong>${label}</strong> · <a href="#" id="planUpgradeLink" style="color:var(--text-primary);text-decoration:underline;">${this.isPro() ? 'Manage' : 'Upgrade'}</a></p>`);
                 document.getElementById('planUpgradeLink').onclick = e => { e.preventDefault(); this.showUpgrade(); };
             }
-            /* --- landing pricing section --- */
             if (!document.getElementById('tvPricing')) {
                 const footer = document.querySelector('footer');
                 const anchor = footer || document.querySelector('.testimonials, #features-section');
@@ -74,16 +99,41 @@
                     sec.id = 'tvPricing'; sec.className = 'tv-pricing';
                     sec.innerHTML = `<h2>Simple, honest pricing</h2><p>Start free. Upgrade when your journaling gets serious.</p>
                     <div class="plan-cards">
-                      <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>
-                        <ul class="plan-feats"><li>Up to ${FREE_TRADE_LIMIT} trades</li><li>Journal, charts & analytics</li><li>All calculators</li><li class="no">CSV import</li><li class="no">PDF & weekly reports</li><li class="no">Grade analytics</li></ul>
+                      <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>${featHTML(FREE_FEATS)}
                         <button class="btn btn-secondary" onclick="location.href='auth.html'">Start Free</button></div>
-                      <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>
-                        <ul class="plan-feats"><li>Unlimited trades</li><li>Everything in Free</li><li>CSV import</li><li>PDF & weekly reports</li><li>Grade analytics</li><li>PRO badge & priority support</li></ul>
+                      <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>${featHTML(PRO_FEATS)}
                         <button class="btn btn-primary" onclick="tvPlan.showUpgrade()">Get Pro</button></div>
                     </div>`;
                     anchor.before(sec);
                 }
             }
+        },
+
+        /* ---------- plan chooser on first login ---------- */
+        showChooser() {
+            const ov = document.getElementById('modalOverlay');
+            if (!ov || ov.classList.contains('active')) return;
+            ov.innerHTML = `<div class="modal" style="max-width:660px;">
+              <div class="modal-header"><h2>Welcome — choose your path</h2><button class="modal-close" onclick="app.closeModal(); localStorage.setItem('tv_plan_chosen','1');">✕</button></div>
+              <div class="modal-body">
+                <div class="plan-cards">
+                  <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>${featHTML(FREE_FEATS)}
+                    <button class="btn btn-secondary" id="chFree" style="width:100%;">Continue Free</button></div>
+                  <div class="plan-card2 pro"><span class="plan-tag">RECOMMENDED</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>${featHTML(PRO_FEATS)}
+                    <button class="btn btn-primary" id="chPro" style="width:100%;">Go Pro / I have a code</button></div>
+                </div>
+              </div></div>`;
+            ov.classList.add('active');
+            document.getElementById('chFree').onclick = () => {
+                localStorage.setItem('tv_plan_chosen', '1');
+                app.closeModal();
+                showToast('Free plan active — upgrade anytime from the sidebar');
+            };
+            document.getElementById('chPro').onclick = () => {
+                localStorage.setItem('tv_plan_chosen', '1');
+                app.closeModal();
+                setTimeout(() => this.showUpgrade(), 250);
+            };
         },
 
         showUpgrade(feature) {
@@ -93,14 +143,12 @@
               <div class="modal-header"><h2>${feature ? feature + ' is a Pro feature' : 'TradeVault Plans'}</h2><button class="modal-close" onclick="app.closeModal()">✕</button></div>
               <div class="modal-body">
                 <div class="plan-cards">
-                  <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>
-                    <ul class="plan-feats"><li>Up to ${FREE_TRADE_LIMIT} trades</li><li>Journal, charts & analytics</li><li>All calculators</li><li class="no">CSV import</li><li class="no">PDF & weekly reports</li><li class="no">Grade analytics</li></ul></div>
-                  <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>
-                    <ul class="plan-feats"><li>Unlimited trades</li><li>Everything in Free</li><li>CSV import</li><li>PDF & weekly reports</li><li>Grade analytics</li><li>PRO badge & priority support</li></ul></div>
+                  <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>${featHTML(FREE_FEATS)}</div>
+                  <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>${featHTML(PRO_FEATS)}</div>
                 </div>
                 <div class="form-group"><label>Have a Pro code?</label>
                   <div style="display:flex;gap:.5rem;">
-                    <input class="form-control" id="proCodeInput" placeholder="PRO-XXXX-0000" style="text-transform:uppercase;">
+                    <input class="form-control" id="proCodeInput" placeholder="TV-PRO-XXXX-XXXX or OWNER-…" style="text-transform:uppercase;">
                     <button class="btn btn-primary" id="proRedeemBtn">Activate</button>
                   </div>
                 </div>
@@ -119,8 +167,10 @@
                 btn.disabled = false; btn.textContent = 'Activate';
                 if (error) return showToast('Error: ' + error.message, 'error');
                 if (data === 'ok') {
-                    this.plan = 'pro'; localStorage.setItem('tv_plan', 'pro');
-                    app.closeModal(); showToast('Welcome to TradeVault Pro ⭐');
+                    this.plan = code.startsWith('OWNER-') ? 'owner' : 'pro';
+                    localStorage.setItem('tv_plan', this.plan);
+                    app.closeModal();
+                    showToast(this.plan === 'owner' ? 'OWNER tier activated 👑' : 'Welcome to TradeVault Pro ⭐');
                     setTimeout(() => location.reload(), 900);
                 } else showToast('Invalid or already-used code', 'error');
             };
@@ -152,7 +202,7 @@
         }
     }
 
-    /* ---------- lock Pro visuals for free users + repaint on nav ---------- */
+    /* ---------- lock Pro visuals for free users ---------- */
     new MutationObserver(() => {
         gates();
         const pdf = document.getElementById('wkPdf');
@@ -169,7 +219,15 @@
 
     document.addEventListener('click', () => setTimeout(() => tvPlan.paint(), 150), true);
 
-    function boot() { tvPlan.refresh(); gates(); tvPlan.paint(); }
+    function boot() {
+        tvPlan.refresh().then(() => {
+            gates();
+            tvPlan.paint();
+            if (tvPlan.hasSession && tvPlan.plan === 'free' && !localStorage.getItem('tv_plan_chosen')) {
+                setTimeout(() => tvPlan.showChooser(), 900);
+            }
+        });
+    }
     if (document.readyState === 'complete') setTimeout(boot, 400);
     else window.addEventListener('load', () => setTimeout(boot, 400));
     if (typeof dashboard !== 'undefined' && !dashboard.__planHooked) {
