@@ -1,4 +1,4 @@
-// ============ TradeVault Plans: Free vs Pro ============
+// ============ TradeVault Plans: Free vs Pro v2 ============
 (function () {
     const FREE_TRADE_LIMIT = 50;
     const STRIPE_LINK = ''; // ← paste your Stripe Payment Link here when ready
@@ -18,6 +18,11 @@
         .plan-feats li.no::before { content: '— '; color: var(--text-tertiary); }
         .pro-badge { background: linear-gradient(135deg,#D9E0E7,#6B737D); color: #0B0D10; font-size: .6rem; font-weight: 800; padding: .12rem .5rem; border-radius: 100px; letter-spacing: .08em; margin-left: .5rem; vertical-align: middle; }
         .lock-teaser { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; min-height: 220px; text-align: center; color: var(--text-secondary); }
+        #tvUpgradeBtn { width: 100%; margin-top: .5rem; min-height: 34px; font-size: .75rem; }
+        .tv-pricing { max-width: 760px; margin: 4rem auto; padding: 0 1.5rem; text-align: center; }
+        .tv-pricing h2 { font-size: 1.6rem; margin-bottom: .4rem; }
+        .tv-pricing p { color: var(--text-secondary); font-size: .85rem; margin-bottom: 1.2rem; }
+        .tv-pricing .plan-card2 { text-align: left; }
     `;
     document.head.appendChild(st);
 
@@ -38,16 +43,46 @@
         },
 
         paint() {
+            /* --- sidebar footer: PRO badge or Upgrade button --- */
             const foot = document.querySelector('.sidebar-footer');
-            if (foot && !foot.querySelector('.pro-badge') && this.isPro()) {
-                const nameEl = foot.querySelector('strong, .user-name, div div');
-                if (nameEl) nameEl.insertAdjacentHTML('afterend', '<span class="pro-badge">PRO</span>');
+            if (foot) {
+                if (this.isPro()) {
+                    if (!foot.querySelector('.pro-badge')) {
+                        const nameEl = foot.querySelector('strong, .user-name, div div');
+                        if (nameEl) nameEl.insertAdjacentHTML('afterend', '<span class="pro-badge">PRO</span>');
+                    }
+                    const ub = document.getElementById('tvUpgradeBtn');
+                    if (ub) ub.remove();
+                } else if (!document.getElementById('tvUpgradeBtn')) {
+                    foot.insertAdjacentHTML('beforeend', '<button class="btn btn-secondary" id="tvUpgradeBtn">⭐ Upgrade to Pro</button>');
+                    document.getElementById('tvUpgradeBtn').onclick = () => this.showUpgrade();
+                }
             }
+            /* --- settings about line --- */
             const about = [...document.querySelectorAll('#settings h3')].find(h => /about/i.test(h.textContent));
             if (about && !document.getElementById('planLine')) {
                 about.parentElement.insertAdjacentHTML('beforeend',
                     `<p id="planLine" style="font-size:.78rem;color:var(--text-secondary);margin-top:.4rem;">Current plan: <strong>${this.isPro() ? 'PRO ⭐' : 'Free'}</strong> · <a href="#" id="planUpgradeLink" style="color:var(--text-primary);text-decoration:underline;">${this.isPro() ? 'Manage' : 'Upgrade'}</a></p>`);
                 document.getElementById('planUpgradeLink').onclick = e => { e.preventDefault(); this.showUpgrade(); };
+            }
+            /* --- landing pricing section --- */
+            if (!document.getElementById('tvPricing')) {
+                const footer = document.querySelector('footer');
+                const anchor = footer || document.querySelector('.testimonials, #features-section');
+                if (anchor) {
+                    const sec = document.createElement('section');
+                    sec.id = 'tvPricing'; sec.className = 'tv-pricing';
+                    sec.innerHTML = `<h2>Simple, honest pricing</h2><p>Start free. Upgrade when your journaling gets serious.</p>
+                    <div class="plan-cards">
+                      <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>
+                        <ul class="plan-feats"><li>Up to ${FREE_TRADE_LIMIT} trades</li><li>Journal, charts & analytics</li><li>All calculators</li><li class="no">CSV import</li><li class="no">PDF & weekly reports</li><li class="no">Grade analytics</li></ul>
+                        <button class="btn btn-secondary" onclick="location.href='auth.html'">Start Free</button></div>
+                      <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>
+                        <ul class="plan-feats"><li>Unlimited trades</li><li>Everything in Free</li><li>CSV import</li><li>PDF & weekly reports</li><li>Grade analytics</li><li>PRO badge & priority support</li></ul>
+                        <button class="btn btn-primary" onclick="tvPlan.showUpgrade()">Get Pro</button></div>
+                    </div>`;
+                    anchor.before(sec);
+                }
             }
         },
 
@@ -58,31 +93,10 @@
               <div class="modal-header"><h2>${feature ? feature + ' is a Pro feature' : 'TradeVault Plans'}</h2><button class="modal-close" onclick="app.closeModal()">✕</button></div>
               <div class="modal-body">
                 <div class="plan-cards">
-                  <div class="plan-card2">
-                    <h4>Free</h4>
-                    <div class="plan-price">$0 <small>forever</small></div>
-                    <ul class="plan-feats">
-                      <li>Up to ${FREE_TRADE_LIMIT} trades</li>
-                      <li>Journal, charts & analytics</li>
-                      <li>All calculators</li>
-                      <li class="no">CSV import</li>
-                      <li class="no">PDF & weekly reports</li>
-                      <li class="no">Grade analytics</li>
-                    </ul>
-                  </div>
-                  <div class="plan-card2 pro">
-                    <span class="plan-tag">MOST POPULAR</span>
-                    <h4>Pro</h4>
-                    <div class="plan-price">$9 <small>/ month</small></div>
-                    <ul class="plan-feats">
-                      <li>Unlimited trades</li>
-                      <li>Everything in Free</li>
-                      <li>CSV import</li>
-                      <li>PDF & weekly reports</li>
-                      <li>Grade analytics</li>
-                      <li>PRO badge & priority support</li>
-                    </ul>
-                  </div>
+                  <div class="plan-card2"><h4>Free</h4><div class="plan-price">$0 <small>forever</small></div>
+                    <ul class="plan-feats"><li>Up to ${FREE_TRADE_LIMIT} trades</li><li>Journal, charts & analytics</li><li>All calculators</li><li class="no">CSV import</li><li class="no">PDF & weekly reports</li><li class="no">Grade analytics</li></ul></div>
+                  <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4><div class="plan-price">$9 <small>/ month</small></div>
+                    <ul class="plan-feats"><li>Unlimited trades</li><li>Everything in Free</li><li>CSV import</li><li>PDF & weekly reports</li><li>Grade analytics</li><li>PRO badge & priority support</li></ul></div>
                 </div>
                 <div class="form-group"><label>Have a Pro code?</label>
                   <div style="display:flex;gap:.5rem;">
@@ -114,9 +128,7 @@
                 if (STRIPE_LINK) window.open(STRIPE_LINK, '_blank');
                 else showToast('Card payments launch soon — use a Pro code for now', 'warning');
             };
-        },
-
-        async redeem(code) { return tvClient.rpc('redeem_pro_code', { p_code: code }); }
+        }
     };
     window.tvPlan = tvPlan;
 
@@ -140,7 +152,7 @@
         }
     }
 
-    /* ---------- lock Pro visuals for free users ---------- */
+    /* ---------- lock Pro visuals for free users + repaint on nav ---------- */
     new MutationObserver(() => {
         gates();
         const pdf = document.getElementById('wkPdf');
@@ -155,7 +167,9 @@
         }
     }).observe(document.body, { childList: true, subtree: true });
 
-    function boot() { tvPlan.refresh(); gates(); }
+    document.addEventListener('click', () => setTimeout(() => tvPlan.paint(), 150), true);
+
+    function boot() { tvPlan.refresh(); gates(); tvPlan.paint(); }
     if (document.readyState === 'complete') setTimeout(boot, 400);
     else window.addEventListener('load', () => setTimeout(boot, 400));
     if (typeof dashboard !== 'undefined' && !dashboard.__planHooked) {
