@@ -1,6 +1,7 @@
-// ============ TradeVault Moonstone Runtime Patch v2 ============
+// ============ TradeVault Moonstone Runtime Patch v3 ============
 (function () {
-    // ---- 0. Load upgrade pack ----
+    // ---- 0. Load plans + upgrade pack ----
+    (function () { var s = document.createElement('script'); s.src = 'js/plans.js'; document.head.appendChild(s); })();
     (function () { var s = document.createElement('script'); s.src = 'js/upgrade.js'; document.head.appendChild(s); })();
 
     // ---- 1. Favicon fix (relative path) ----
@@ -16,11 +17,9 @@
     ov.textContent = [
         '.btn-primary, .btn-primary:hover { color: #0B0D10 !important; }',
         '::selection { background: rgba(217,224,231,.25); color: #0B0D10; }',
-        /* Daylight — Moonstone light theme */
-        'html[data-theme="light"] { --bg-primary:#EEF1F4; --bg-secondary:#F7F9FA; --bg-tertiary:#DDE3E8; --bg-card:rgba(255,255,255,0.8); --bg-glass:rgba(247,249,250,0.7); --text-primary:#2A3138; --text-secondary:#5A636B; --text-tertiary:#6B737D; --border-color:rgba(107,115,125,0.28); --border-hover:#6B737D; --accent-primary:#4A5259; --accent-secondary:#6B737D; --accent-gradient:linear-gradient(135deg,#7D858C 0%,#5A636B 100%); }',
+        'html[data-theme="light"] { --bg-primary:#EEF1F4; --bg-secondary:#F7F9FA; --bg-tertiary:#DDE3E8; --bg-card:rgba(255,255,255,0.8); --bg-glass:rgba(247,249,250,0.7); --text-primary:#2A3138; --text-secondary:#5A636B; --text-tertiary:#6B737D; --border-color:rgba(107,115,125,0.28); --border-hover:#6B737D; --accent-primary:#4A5259; --accent-secondary:#6B737D; --accent-gradient:linear-gradient(135deg,#7D858C 0%,#5A536B 100%); }',
         'html[data-theme="light"] .btn-primary, html[data-theme="light"] .btn-primary:hover { color: #F7F9FA !important; }',
         'html[data-theme="light"] ::selection { background: rgba(107,115,125,.25); color: #2A3138; }',
-        /* Mobile polish */
         '@media (max-width:640px){ .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;} #tradesTable{min-width:680px;} .modal{width:96vw;max-height:92vh;} .filters-bar{flex-wrap:wrap;} .filters-bar select,.filters-bar input[type="date"]{flex:1;min-width:46%;} }'
     ].join('\n');
     document.head.appendChild(ov);
