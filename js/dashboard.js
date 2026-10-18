@@ -1,4 +1,4 @@
-// Load the Moonstone runtime patcher (no index.html edit needed)
+// Load the Moonstone runtime patcher
 (function () {
     var s = document.createElement('script');
     s.src = 'js/palette.js';
@@ -204,7 +204,7 @@ class Dashboard {
         el.innerHTML = recent.map(t => `
             <div class="recent-row" onclick="trades.showTradeDetail(${t.id})">
                 <div class="recent-left">
-                    <span class="badge ${t.direction === 'long' ? 'badge-success' : 'badge-danger'}">${t.direction || 'N/A'}</span>
+                    <span class="badge ${t.direction === 'long' ? 'badge-long' : 'badge-short'}">${t.direction || 'N/A'}</span>
                     <div>
                         <div class="recent-symbol">${t.symbol || 'Unknown'}</div>
                         <div class="recent-meta">${formatDate(t.entryDate)} · ${t.strategy || 'No strategy'} · ${formatNumber(t.rMultiple, 2)}R</div>
