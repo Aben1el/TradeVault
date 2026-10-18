@@ -1,8 +1,12 @@
-// ============ TradeVault Moonstone Runtime Patch v3 ============
+// ============ TradeVault Moonstone Runtime Patch v4 ============
 (function () {
-    // ---- 0. Load plans + upgrade pack ----
-    (function () { var s = document.createElement('script'); s.src = 'js/plans.js'; document.head.appendChild(s); })();
-    (function () { var s = document.createElement('script'); s.src = 'js/upgrade.js'; document.head.appendChild(s); })();
+    if (window.__tvPaletteLoaded) return;   // never run twice
+    window.__tvPaletteLoaded = 1;
+
+    // ---- 0. Load plans + upgrade + mobile packs ----
+    ['js/plans.js', 'js/upgrade.js', 'js/mobile.js'].forEach(function (src) {
+        var s = document.createElement('script'); s.src = src; document.head.appendChild(s);
+    });
 
     // ---- 1. Favicon fix (relative path) ----
     (function fixFavicon() {
@@ -12,15 +16,18 @@
         link.href = 'Images/favicon.png?v=6';
     })();
 
-    // ---- 2. Hard overrides + Daylight light theme + mobile polish ----
+    // ---- 2. Overrides + Daylight light theme (refined) ----
     var ov = document.createElement('style');
     ov.textContent = [
         '.btn-primary, .btn-primary:hover { color: #0B0D10 !important; }',
         '::selection { background: rgba(217,224,231,.25); color: #0B0D10; }',
-        'html[data-theme="light"] { --bg-primary:#EEF1F4; --bg-secondary:#F7F9FA; --bg-tertiary:#DDE3E8; --bg-card:rgba(255,255,255,0.8); --bg-glass:rgba(247,249,250,0.7); --text-primary:#2A3138; --text-secondary:#5A636B; --text-tertiary:#6B737D; --border-color:rgba(107,115,125,0.28); --border-hover:#6B737D; --accent-primary:#4A5259; --accent-secondary:#6B737D; --accent-gradient:linear-gradient(135deg,#7D858C 0%,#5A536B 100%); }',
-        'html[data-theme="light"] .btn-primary, html[data-theme="light"] .btn-primary:hover { color: #F7F9FA !important; }',
-        'html[data-theme="light"] ::selection { background: rgba(107,115,125,.25); color: #2A3138; }',
-        '@media (max-width:640px){ .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;} #tradesTable{min-width:680px;} .modal{width:96vw;max-height:92vh;} .filters-bar{flex-wrap:wrap;} .filters-bar select,.filters-bar input[type="date"]{flex:1;min-width:46%;} }'
+        /* Daylight — Moonstone light theme, complete */
+        'html[data-theme="light"] { --bg-primary:#EDF0F2; --bg-secondary:#FBFCFC; --bg-tertiary:#E1E6E9; --bg-card:rgba(255,255,255,.86); --bg-glass:rgba(251,252,252,.7); --text-primary:#22282E; --text-secondary:#57616A; --text-tertiary:#6B737D; --border-color:rgba(107,115,125,.22); --border-hover:#8A9299; --accent-primary:#3E464E; --accent-secondary:#6B737D; --accent-gradient:linear-gradient(135deg,#6B737D 0%,#4A5259 100%); --shadow-md:0 4px 16px rgba(34,40,46,.12); }',
+        'html[data-theme="light"] .btn-primary, html[data-theme="light"] .btn-primary:hover { color: #FBFCFC !important; }',
+        'html[data-theme="light"] .card, html[data-theme="light"] .stat-card, html[data-theme="light"] .today-card, html[data-theme="light"] .chart-container { background: rgba(255,255,255,.92); border-color: rgba(107,115,125,.18); box-shadow: 0 2px 10px rgba(34,40,46,.06); }',
+        'html[data-theme="light"] input, html[data-theme="light"] select, html[data-theme="light"] textarea, html[data-theme="light"] .form-control { background: #F1F4F6; color: #22282E; border-color: rgba(107,115,125,.25); }',
+        'html[data-theme="light"] .sidebar, html[data-theme="light"] .modal { background: #FBFCFC; }',
+        'html[data-theme="light"] ::selection { background: rgba(107,115,125,.25); color: #22282E; }'
     ].join('\n');
     document.head.appendChild(ov);
 
