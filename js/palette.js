@@ -1,4 +1,4 @@
-// ============ TradeVault Moonstone + Liquid Glass Runtime Patch v5 ============
+// ============ TradeVault Moonstone + Deep Liquid Glass Runtime Patch v6 ============
 (function () {
     if (window.__tvPaletteLoaded) return;   // never run twice
     window.__tvPaletteLoaded = 1;
@@ -16,16 +16,16 @@
         link.href = 'Images/favicon.png?v=6';
     })();
 
-    // ---- 2. LIQUID GLASS LAYER ----
+    // ---- 2. DEEP LIQUID GLASS LAYER ----
     var gl = document.createElement('style');
     gl.textContent = `
-        /* ambient liquid glow drifting behind everything */
+        /* ambient glow — brighter, so the glass has something to refract */
         body::before { content: ''; position: fixed; inset: -25%; z-index: -1; pointer-events: none;
           background:
-            radial-gradient(38% 34% at 22% 18%, rgba(217,224,231,.10), transparent 60%),
-            radial-gradient(30% 30% at 78% 32%, rgba(107,115,125,.13), transparent 60%),
-            radial-gradient(36% 38% at 50% 84%, rgba(217,224,231,.07), transparent 60%);
-          filter: blur(34px);
+            radial-gradient(38% 34% at 22% 18%, rgba(217,224,231,.13), transparent 60%),
+            radial-gradient(30% 30% at 78% 32%, rgba(107,115,125,.16), transparent 60%),
+            radial-gradient(36% 38% at 50% 84%, rgba(217,224,231,.09), transparent 60%);
+          filter: blur(40px);
           animation: tvDrift 26s ease-in-out infinite alternate; }
         @keyframes tvDrift {
           0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
@@ -34,79 +34,80 @@
         @keyframes tvFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
         .section { animation: tvFadeUp .45s cubic-bezier(.22,1,.36,1); }
 
-        /* frosted glass surfaces */
+        /* see-through glass surfaces */
         .card, .stat-card, .today-card, .trade-card, .chart-container, .calculator-card,
         .monthly-item, .recent-row, .smart-insight, .plan-card2, .review-card, .goal-card, .strategy-card {
-          background: rgba(217, 224, 231, 0.055) !important;
-          backdrop-filter: blur(14px) saturate(130%);
-          -webkit-backdrop-filter: blur(14px) saturate(130%);
-          border: 1px solid rgba(217, 224, 231, 0.10) !important;
-          box-shadow: 0 8px 28px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.07);
-          border-radius: 16px;
+          background: rgba(217, 224, 231, 0.035) !important;
+          backdrop-filter: blur(20px) saturate(150%);
+          -webkit-backdrop-filter: blur(20px) saturate(150%);
+          border: 1px solid rgba(217, 224, 231, 0.09) !important;
+          box-shadow: 0 10px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.02);
+          border-radius: 18px;
           transition: transform .35s cubic-bezier(.22,1,.36,1), border-color .35s ease, box-shadow .35s ease, background .35s ease; }
         .card:hover, .stat-card:hover, .today-card:hover, .trade-card:hover, .chart-container:hover {
           transform: translateY(-3px);
-          border-color: rgba(217,224,231,.22) !important;
-          background: rgba(217,224,231,.08) !important;
-          box-shadow: 0 14px 40px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.10); }
+          border-color: rgba(217,224,231,.20) !important;
+          background: rgba(217,224,231,.06) !important;
+          box-shadow: 0 16px 44px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.12); }
 
-        /* glass shell: sidebar, modals, navs */
-        .sidebar { background: rgba(11,13,16,.55) !important; backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); border-right: 1px solid rgba(217,224,231,.08) !important; }
-        .nav-item.active { background: rgba(217,224,231,.10) !important; border: 1px solid rgba(217,224,231,.16); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
-        .modal { background: rgba(17,20,24,.72) !important; backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
-          border: 1px solid rgba(217,224,231,.14) !important; box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08); }
-        .modal-overlay { background: rgba(6,8,10,.55) !important; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-        #tvBottomNav { background: rgba(11,13,16,.62) !important; backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%); border-top: 1px solid rgba(217,224,231,.10) !important; }
-        #tvSheet { background: rgba(11,13,16,.78) !important; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
-        .navbar, .landing-nav { background: rgba(11,13,16,.45) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(217,224,231,.08); }
+        /* glass shell */
+        .sidebar { background: rgba(11,13,16,.38) !important; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); border-right: 1px solid rgba(217,224,231,.07) !important; }
+        .nav-item.active { background: rgba(217,224,231,.08) !important; border: 1px solid rgba(217,224,231,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+        .modal { background: rgba(15,18,22,.60) !important; backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+          border: 1px solid rgba(217,224,231,.12) !important; border-radius: 20px;
+          box-shadow: 0 40px 100px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10); }
+        .modal-overlay { background: rgba(6,8,10,.45) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        #tvBottomNav { background: rgba(11,13,16,.50) !important; backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); border-top: 1px solid rgba(217,224,231,.09) !important; }
+        #tvSheet { background: rgba(11,13,16,.66) !important; backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%); }
+        .navbar, .landing-nav { background: rgba(11,13,16,.35) !important; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom: 1px solid rgba(217,224,231,.07); }
 
-        /* liquid buttons: glass body + light sweep on hover */
-        .btn { position: relative; overflow: hidden; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        /* liquid buttons */
+        .btn { position: relative; overflow: hidden; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .btn::after { content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
           background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent);
           transform: skewX(-18deg); transition: left .55s ease; pointer-events: none; }
         .btn:hover::after { left: 120%; }
-        .btn-secondary { background: rgba(217,224,231,.08) !important; border: 1px solid rgba(217,224,231,.14) !important; }
-        .btn-primary { box-shadow: 0 6px 20px rgba(217,224,231,.18), inset 0 1px 0 rgba(255,255,255,.35); }
-        .filter-btn, .month-btn { background: rgba(217,224,231,.06) !important; border: 1px solid rgba(217,224,231,.10) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-        .filter-btn.active, .month-btn.active { background: rgba(217,224,231,.16) !important; border-color: rgba(217,224,231,.28) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+        .btn-secondary { background: rgba(217,224,231,.06) !important; border: 1px solid rgba(217,224,231,.12) !important; }
+        .btn-primary { box-shadow: 0 6px 22px rgba(217,224,231,.20), inset 0 1px 0 rgba(255,255,255,.40); }
+        .filter-btn, .month-btn { background: rgba(217,224,231,.04) !important; border: 1px solid rgba(217,224,231,.09) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .filter-btn.active, .month-btn.active { background: rgba(217,224,231,.12) !important; border-color: rgba(217,224,231,.24) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
 
         /* glass inputs */
         input, select, textarea, .form-control {
-          background: rgba(217,224,231,.06) !important; border: 1px solid rgba(217,224,231,.12) !important;
-          backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+          background: rgba(217,224,231,.04) !important; border: 1px solid rgba(217,224,231,.10) !important;
+          backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 12px; }
         input:focus, select:focus, textarea:focus, .form-control:focus {
-          background: rgba(217,224,231,.10) !important; border-color: rgba(217,224,231,.30) !important;
-          box-shadow: 0 0 0 3px rgba(217,224,231,.10), inset 0 1px 0 rgba(255,255,255,.06); }
+          background: rgba(217,224,231,.08) !important; border-color: rgba(217,224,231,.28) !important;
+          box-shadow: 0 0 0 3px rgba(217,224,231,.12), inset 0 1px 0 rgba(255,255,255,.06); }
 
         /* glass scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(217,224,231,.18); border-radius: 8px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(217,224,231,.30); }
+        ::-webkit-scrollbar-thumb { background: rgba(217,224,231,.16); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(217,224,231,.28); }
 
-        /* phone: lighter blur = smooth scrolling */
+        /* phone: keep it smooth */
         @media (max-width: 768px) {
           .card, .stat-card, .today-card, .trade-card, .chart-container, .calculator-card,
-          .monthly-item, .recent-row, .smart-insight, .plan-card2 { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+          .monthly-item, .recent-row, .smart-insight, .plan-card2 { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         }
         @media (prefers-reduced-motion: reduce) {
           body::before { animation: none; }
           .btn::after { display: none; }
         }
 
-        /* Daylight = frosted white glass */
-        html[data-theme="light"] body::before { opacity: .55; }
+        /* Daylight = frosted white glass, same transparency philosophy */
+        html[data-theme="light"] body::before { opacity: .6; }
         html[data-theme="light"] .card, html[data-theme="light"] .stat-card, html[data-theme="light"] .today-card,
         html[data-theme="light"] .trade-card, html[data-theme="light"] .chart-container, html[data-theme="light"] .calculator-card,
         html[data-theme="light"] .monthly-item, html[data-theme="light"] .recent-row, html[data-theme="light"] .smart-insight,
         html[data-theme="light"] .plan-card2 {
-          background: rgba(255,255,255,.55) !important; border-color: rgba(107,115,125,.18) !important;
-          box-shadow: 0 8px 28px rgba(34,40,46,.10), inset 0 1px 0 rgba(255,255,255,.7); }
-        html[data-theme="light"] .modal { background: rgba(251,252,252,.80) !important; }
-        html[data-theme="light"] .sidebar, html[data-theme="light"] #tvBottomNav, html[data-theme="light"] #tvSheet { background: rgba(251,252,252,.66) !important; }
-        html[data-theme="light"] .btn-secondary, html[data-theme="light"] .filter-btn, html[data-theme="light"] .month-btn { background: rgba(255,255,255,.60) !important; }
-        html[data-theme="light"] input, html[data-theme="light"] select, html[data-theme="light"] textarea, html[data-theme="light"] .form-control { background: rgba(255,255,255,.65) !important; }
+          background: rgba(255,255,255,.45) !important; border-color: rgba(107,115,125,.16) !important;
+          box-shadow: 0 10px 30px rgba(34,40,46,.08), inset 0 1px 0 rgba(255,255,255,.8); }
+        html[data-theme="light"] .modal { background: rgba(251,252,252,.70) !important; }
+        html[data-theme="light"] .sidebar, html[data-theme="light"] #tvBottomNav, html[data-theme="light"] #tvSheet { background: rgba(251,252,252,.55) !important; }
+        html[data-theme="light"] .btn-secondary, html[data-theme="light"] .filter-btn, html[data-theme="light"] .month-btn { background: rgba(255,255,255,.50) !important; }
+        html[data-theme="light"] input, html[data-theme="light"] select, html[data-theme="light"] textarea, html[data-theme="light"] .form-control { background: rgba(255,255,255,.50) !important; }
     `;
     document.head.appendChild(gl);
 
