@@ -4,7 +4,7 @@
     window.__tvPaletteLoaded = 1;
 
     // ---- 0. Load plans + upgrade + mobile packs ----
-    ['js/plans.js', 'js/upgrade.js', 'js/mobile.js'].forEach(function (src) {
+    ['js/plans.js', 'js/upgrade.js', 'js/mobile.js', 'js/loader.js'].forEach(function (src) {
         var s = document.createElement('script'); s.src = src; document.head.appendChild(s);
     });
 
