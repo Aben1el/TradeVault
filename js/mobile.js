@@ -1,12 +1,28 @@
-// ============ TradeVault Mobile Perfection Pack v2 ============
+// ============ TradeVault Layout & Mobile Perfection Pack v3 ============
 (function () {
     const st = document.createElement('style');
     st.textContent = `
+        /* ---------- sidebar footer: never clip again ---------- */
+        .sidebar-footer, .sidebar-bottom, .sidebar > div:last-child {
+          padding: .6rem .55rem; display: flex; flex-direction: column; gap: .45rem; }
+        .sidebar-footer .btn, .sidebar-bottom .btn, .sidebar > div:last-child .btn {
+          width: 100%; white-space: normal; line-height: 1.25; font-size: .7rem;
+          padding: .45rem .5rem; min-height: 34px; text-align: center;
+          overflow: hidden; text-overflow: ellipsis; }
+        .sidebar.tv-narrow .sidebar-footer .btn, .sidebar.tv-narrow .sidebar-bottom .btn,
+        .sidebar.tv-narrow > div:last-child .btn { display: none !important; }
+        .sidebar.tv-narrow .sidebar-footer, .sidebar.tv-narrow .sidebar-bottom,
+        .sidebar.tv-narrow > div:last-child { align-items: center; padding: .6rem .3rem; }
+        .sidebar.tv-narrow .user-avatar-img, .sidebar.tv-narrow .user-avatar,
+        .sidebar.tv-narrow .sidebar-footer img { display: block; margin: 0 auto; }
+        .sidebar.tv-narrow .sidebar-footer strong, .sidebar.tv-narrow .sidebar-footer small,
+        .sidebar.tv-narrow .sidebar-footer div div { display: none; }
+
         /* ---------- bottom tab bar ---------- */
         #tvBottomNav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; display: none;
-          grid-template-columns: repeat(5, 1fr); background: rgba(11,13,16,.96);
-          backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-          border-top: 1px solid rgba(107,115,125,.3);
+          grid-template-columns: repeat(5, 1fr); background: rgba(11,13,16,.50);
+          backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+          border-top: 1px solid rgba(217,224,231,.09);
           padding: .25rem .2rem calc(.25rem + env(safe-area-inset-bottom)); }
         #tvBottomNav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .12rem;
           background: none; border: none; color: #6B737D; font: 600 .6rem Inter, sans-serif; letter-spacing: .02em;
@@ -17,9 +33,9 @@
         /* ---------- more sheet ---------- */
         #tvSheetBack { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 130; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
         #tvSheetBack.open { opacity: 1; pointer-events: auto; }
-        #tvSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 131; background: rgba(11,13,16,.98);
-          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-          border-top: 1px solid rgba(107,115,125,.35); border-radius: 20px 20px 0 0;
+        #tvSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 131; background: rgba(11,13,16,.66);
+          backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+          border-top: 1px solid rgba(217,224,231,.35); border-radius: 20px 20px 0 0;
           transform: translateY(105%); transition: transform .3s cubic-bezier(.22,1,.36,1);
           padding: .5rem .9rem calc(.9rem + env(safe-area-inset-bottom)); }
         #tvSheet.open { transform: translateY(0); }
@@ -130,7 +146,6 @@
             else if (t.dataset.go === 'upgrade') setTimeout(() => window.tvPlan && tvPlan.showUpgrade(), 250);
             else if (typeof app !== 'undefined') setTimeout(() => app.navigateTo(t.dataset.go), 200);
         });
-        /* let the old hamburger open the sheet too, if it exists */
         document.querySelectorAll('#menuBtn, .menu-btn, #sidebarToggle, .sidebar-toggle, #navToggle, .nav-toggle, #hamburger, .hamburger').forEach(el => {
             el.addEventListener('click', e => { e.preventDefault(); openSheet(); });
         });
@@ -155,6 +170,18 @@
         if (back) back.classList.remove('open');
     }
 
+    /* ---------- narrow/collapsed sidebar: footer becomes avatar-only ---------- */
+    function watchSidebar() {
+        const sb = document.querySelector('.sidebar');
+        if (!sb || sb.__tvNarrowWatched) return;
+        sb.__tvNarrowWatched = 1;
+        const check = () => sb.classList.toggle('tv-narrow', sb.offsetWidth > 0 && sb.offsetWidth < 150);
+        check();
+        if (window.ResizeObserver) new ResizeObserver(check).observe(sb);
+        window.addEventListener('resize', check);
+        new MutationObserver(check).observe(sb, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
+
     function syncNav() {
         const nav = document.getElementById('tvBottomNav');
         if (!nav) return;
@@ -172,6 +199,6 @@
     }
 
     new MutationObserver(() => syncNav()).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); }, 600);
-    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); }, 600));
+    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); watchSidebar(); }, 600);
+    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); watchSidebar(); }, 600));
 })();
