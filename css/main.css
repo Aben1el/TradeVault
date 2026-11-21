@@ -1240,3 +1240,45 @@ html.tv-ready #tvBootWord { opacity: 0; filter: blur(6px); transform: scale(1.05
   #tvBootWord span { opacity: 1 !important; }
   #tvBootWord span.cur { animation: none; }
 }
+/* =========================================
+   TRADEVAULT LUXURY BOOT (The Breathe)
+   ========================================= */
+   
+/* 1. Kill old attempts */
+html::after { display: none !important; }
+#tvBootWord, #tvLoader { display: none !important; }
+
+/* 2. The Loader Overlay */
+#tv-lux-loader {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #0B0D10; /* Deep charcoal */
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.8s ease;
+}
+
+/* 3. The Word */
+.tv-lux-word {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-weight: 200; /* Ultra-thin for elegance */
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  color: #D9E0E7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* Start tight */
+  opacity: 0;
+  animation: tv-lux-breathe 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* 4. The Animation: Blur -> Sharp & Wide -> Dissolve */
+@keyframes tv-lux-breathe {
+  0%   { opacity: 0; letter-spacing: -0.1em; filter: blur(12px); transform: scale(0.95); }
+  35%  { opacity: 1; letter-spacing: 0.4em;  filter: blur(0);    transform: scale(1); } /* Crisp & Wide */
+  75%  { opacity: 1; letter-spacing: 0.4em;  filter: blur(0);    transform: scale(1); } /* Hold */
+  100% { opacity: 0; letter-spacing: 0.6em;  filter: blur(14px); transform: scale(1.05); } /* Dissolve */
+}
+
+/* 5. Hide site content until ready */
+body.tv-loading > *:not(#tv-lux-loader) { opacity: 0 !important; visibility: hidden !important; }
+body.tv-ready > *:not(#tv-lux-loader) { opacity: 1 !important; visibility: visible !important; transition: opacity 1s ease; }
+
+/* 6. Exit */
+#tv-lux-loader.done { opacity: 0; pointer-events: none; }
