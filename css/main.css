@@ -1146,3 +1146,12 @@ body.sb-collapsed .nav-item.active .nav-icon svg {
     border-top-color: #5FB4C4 !important;
     background: transparent !important;
 }
+/* ============ OLD SPINNER LOADER RETIRED — cinematic loader owns the boot ============ */
+[id*="loader" i]:not(#tvLoader),
+[id*="loading" i]:not(#tvLoader),
+[id*="preloader" i],
+[id*="splash" i],
+[class*="loading-screen" i],
+[class*="loader-overlay" i],
+[class*="preloader" i],
+[class*="splash-screen" i] { display: none !important; }
