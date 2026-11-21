@@ -1,12 +1,39 @@
-// ============ TradeVault Layout & Mobile Perfection Pack v4 ============
+// ============ TradeVault Layout & Mobile Perfection Pack v5 ============
 (function () {
     const st = document.createElement('style');
     st.textContent = `
-        /* ---------- RESCUE: sidebar top row (brand + theme + collapse) always visible on desktop ---------- */
+        /* ---------- desktop sidebar: own collapse system, original look ---------- */
         @media (min-width: 769px) {
-          .sidebar > div:first-of-type { display: flex !important; align-items: center; justify-content: space-between; gap: .4rem; padding: .8rem .7rem; }
+          /* expanded = like before */
+          body:not(.tv-sb-min) .sidebar { width: var(--sidebar-width, 260px) !important; }
+          body:not(.tv-sb-min) .sidebar .nav-item { font-size: .82rem !important; }
+          body:not(.tv-sb-min) .sidebar .nav-item span:not(.nav-icon),
+          body:not(.tv-sb-min) .sidebar .nav-item p:not(.nav-icon) { display: inline !important; }
+          body:not(.tv-sb-min) #mainContent, body:not(.tv-sb-min) .main-content, body:not(.tv-sb-min) main { margin-left: var(--sidebar-width, 260px) !important; }
+          /* top row always visible, original grouping */
+          .sidebar > div:first-of-type { display: flex !important; align-items: center; gap: .45rem; padding: .9rem .8rem; }
+          .sidebar > div:first-of-type > *:nth-child(2) { margin-left: auto; }
+          /* my round toggle (replaces the dead original) */
+          #tvSbBtn { margin-left: .35rem; width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; line-height: 1;
+            color: var(--text-secondary); background: var(--bg-tertiary); border: 1px solid var(--border-color); }
+          #tvSbBtn:hover { color: var(--text-primary); border-color: var(--border-hover); }
+          #collapseBtn, .collapse-btn, #sidebarCollapse, .sidebar-collapse { display: none !important; }
+          /* collapsed = clean icon rail */
+          body.tv-sb-min .sidebar { width: 76px !important; }
+          body.tv-sb-min .sidebar .nav-item { justify-content: center; font-size: 0 !important; }
+          body.tv-sb-min .sidebar .nav-item svg { width: 20px; height: 20px; }
+          body.tv-sb-min .sidebar .nav-item span:not(.nav-icon),
+          body.tv-sb-min .sidebar .nav-item p:not(.nav-icon) { display: none !important; }
+          body.tv-sb-min #sidebarBrand span, body.tv-sb-min #sidebarBrand strong,
+          body.tv-sb-min .sidebar .brand-text { display: none !important; }
+          body.tv-sb-min #mainContent, body.tv-sb-min .main-content, body.tv-sb-min main { margin-left: 76px !important; }
+          body.tv-sb-min .sidebar-footer .btn, body.tv-sb-min .sidebar-footer strong,
+          body.tv-sb-min .sidebar-footer small, body.tv-sb-min .sidebar-footer div div { display: none !important; }
+          body.tv-sb-min .sidebar-footer { align-items: center; padding: .6rem .3rem; }
+          body.tv-sb-min .sidebar-footer img { display: block; margin: 0 auto; }
+          body.tv-sb-min .sidebar > div:first-of-type > *:nth-child(2) { margin-left: 0; }
         }
-        #tvSbToggle { min-height: 30px; padding: .2rem .55rem; font-size: .85rem; border-radius: 9px; }
 
         /* ---------- sidebar footer: never clip ---------- */
         .sidebar-footer, .sidebar-bottom, .sidebar > div:last-child {
@@ -15,14 +42,6 @@
           width: 100%; white-space: normal; line-height: 1.25; font-size: .7rem;
           padding: .45rem .5rem; min-height: 34px; text-align: center;
           overflow: hidden; text-overflow: ellipsis; }
-        .sidebar.tv-narrow .sidebar-footer .btn, .sidebar.tv-narrow .sidebar-bottom .btn,
-        .sidebar.tv-narrow > div:last-child .btn { display: none !important; }
-        .sidebar.tv-narrow .sidebar-footer, .sidebar.tv-narrow .sidebar-bottom,
-        .sidebar.tv-narrow > div:last-child { align-items: center; padding: .6rem .3rem; }
-        .sidebar.tv-narrow .user-avatar-img, .sidebar.tv-narrow .user-avatar,
-        .sidebar.tv-narrow .sidebar-footer img { display: block; margin: 0 auto; }
-        .sidebar.tv-narrow .sidebar-footer strong, .sidebar.tv-narrow .sidebar-footer small,
-        .sidebar.tv-narrow .sidebar-footer div div { display: none; }
 
         /* ---------- bottom tab bar ---------- */
         #tvBottomNav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; display: none;
@@ -170,35 +189,22 @@
         if (back) back.classList.remove('open');
     }
 
-    /* ---------- narrow/collapsed sidebar handling ---------- */
-    function watchSidebar() {
+    /* ---------- our own collapse: round button, persisted, always works ---------- */
+    function setupCollapse() {
         const sb = document.querySelector('.sidebar');
-        if (!sb || sb.__tvNarrowWatched) return;
-        sb.__tvNarrowWatched = 1;
-        const check = () => sb.classList.toggle('tv-narrow', sb.offsetWidth > 0 && sb.offsetWidth < 150);
-        check();
-        if (window.ResizeObserver) new ResizeObserver(check).observe(sb);
-        window.addEventListener('resize', check);
-        new MutationObserver(check).observe(sb, { attributes: true, attributeFilter: ['class', 'style'] });
-    }
-
-    /* ---------- rescue: guarantee a visible collapse/expand control ---------- */
-    function restoreTop() {
-        const sb = document.querySelector('.sidebar');
-        if (!sb) return;
+        if (!sb || sb.__tvSbBtn) return;
         const row = sb.querySelector(':scope > div:first-of-type');
         if (!row) return;
-        if (row.querySelector('button')) return;           // original buttons are back — nothing to do
-        if (row.querySelector('#tvSbToggle')) return;
+        sb.__tvSbBtn = 1;
+        if (localStorage.getItem('tv_sb_min') === '1') document.body.classList.add('tv-sb-min');
         const b = document.createElement('button');
-        b.id = 'tvSbToggle'; b.className = 'btn btn-secondary';
-        b.title = 'Expand / collapse sidebar';
-        b.textContent = sb.offsetWidth < 150 ? '»' : '«';
+        b.id = 'tvSbBtn'; b.type = 'button'; b.title = 'Collapse / expand sidebar';
+        const glyph = () => { b.textContent = document.body.classList.contains('tv-sb-min') ? '»' : '«'; };
+        glyph();
         b.onclick = () => {
-            const t = sb.querySelector('#collapseBtn, .collapse-btn, #sidebarCollapse, .sidebar-collapse, [title*="ollapse"], [aria-label*="ollapse"]');
-            if (t) t.click();
-            else document.body.classList.toggle('sb-collapsed');
-            setTimeout(() => { b.textContent = sb.offsetWidth < 150 ? '»' : '«'; }, 250);
+            document.body.classList.toggle('tv-sb-min');
+            localStorage.setItem('tv_sb_min', document.body.classList.contains('tv-sb-min') ? '1' : '0');
+            glyph();
         };
         row.appendChild(b);
     }
@@ -219,7 +225,7 @@
         if (inApp === false) closeSheet();
     }
 
-    new MutationObserver(() => { syncNav(); restoreTop(); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); watchSidebar(); restoreTop(); }, 600);
-    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); watchSidebar(); restoreTop(); }, 600));
+    new MutationObserver(() => { syncNav(); setupCollapse(); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); setupCollapse(); }, 600);
+    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); setupCollapse(); }, 600));
 })();
