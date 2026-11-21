@@ -1218,3 +1218,25 @@ html::after {
 @media (prefers-reduced-motion: reduce) {
   html::after { animation: none; content: 'TRADEVAULT'; }
 }
+
+/* ============ BOOT v5 — CSS backdrop only; JS types the letters ============ */
+html::after { content: '' !important; animation: none !important; border-right: none !important; }
+#tvBootWord {
+  position: fixed; inset: 0; margin: auto; width: 11.5em; height: 1.6em;
+  display: flex; align-items: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 300; text-transform: uppercase;
+  font-size: clamp(1.4rem, 6vw, 3rem);
+  letter-spacing: .42em; color: #D9E0E7;
+  z-index: 2147483001; pointer-events: none;
+  transition: opacity .4s ease, filter .4s ease, transform .4s ease;
+}
+#tvBootWord span { opacity: 0; }
+#tvBootWord span.on { opacity: 1; }
+#tvBootWord span.cur { border-right: 2px solid rgba(217,224,231,.85); animation: tvCaretBlink .6s step-end infinite; }
+@keyframes tvCaretBlink { 0%,100% { border-color: rgba(217,224,231,.85); } 50% { border-color: transparent; } }
+html.tv-ready #tvBootWord { opacity: 0; filter: blur(6px); transform: scale(1.05); }
+@media (prefers-reduced-motion: reduce) {
+  #tvBootWord span { opacity: 1 !important; }
+  #tvBootWord span.cur { animation: none; }
+}
