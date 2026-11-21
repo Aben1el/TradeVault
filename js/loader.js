@@ -1,11 +1,9 @@
-// ============ TradeVault Boot Overlay v7 ============
+// ============ TradeVault Boot Overlay v8 ============
 (function () {
     if (window.__tvBootLoaded) return;
     window.__tvBootLoaded = 1;
 
-    ['js/themes.js', 'js/sbfix.js'].forEach(function (src) {
-        var s = document.createElement('script'); s.src = src; document.head.appendChild(s);
-    });
+    (function () { var s = document.createElement('script'); s.src = 'js/themes.js'; document.head.appendChild(s); })();
 
     const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const MIN = REDUCED ? 400 : 2300;
