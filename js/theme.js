@@ -1,85 +1,128 @@
-// ============ TradeVault Theme System ============
+// ============ TradeVault Theme Studio v2 — Liquid Black default, per-user images ============
 (function () {
-    const css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = 'css/theme-light.css';
-    document.head.appendChild(css);
+    if (window.__tvThemesLoaded) return;
+    window.__tvThemesLoaded = 1;
 
-    const root = document.documentElement;
-    const get = () => root.dataset.theme || 'dark';
-    const set = (t) => {
-        root.dataset.theme = t;
-        localStorage.setItem('tv_theme', t);
-        updateIcons();
-        applyCharts();
-    };
+    const st = document.createElement('style');
+    st.textContent = `
+        /* ambient layers live again (glow only — clouds are NOT the default anymore) */
+        body:not(.tv-booted)::before, body:not(.tv-booted)::after { opacity: 1 !important; }
+        /* per-user background hook: none = Liquid Black */
+        body::after { background-image: var(--tv-bg, none) !important; }
+        html::before { opacity: var(--tv-veil-o, 1); }
+        /* Liquid Black depth: soft sheen so the glass has something to refract */
+        html:not(.tv-has-bg) body {
+          background-image:
+            radial-gradient(70% 55% at 50% -5%, rgba(217,224,231,.06), transparent 70%),
+            radial-gradient(45% 40% at 88% 112%, rgba(107,115,125,.09), transparent 70%) !important;
+        }
+        html:not(.tv-has-bg) body::before { opacity: 1 !important; }
+        /* studio UI */
+        .tv-studio { display: grid; gap: .8rem; }
+        .tv-studio-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+        .tv-bg-prev { width: 92px; height: 56px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-color);
+          background: radial-gradient(60% 60% at 50% 0%, rgba(217,224,231,.10), #0B0D10); }
+        .tv-studio input[type="range"] { flex: 1; min-width: 140px; accent-color: #D9E0E7; }
+        .tv-studio-note { font-size: .7rem; color: var(--text-tertiary); }
+    `;
+    document.head.appendChild(st);
 
-    const sun = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
-    const moon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    const state = { url: null, veil: 70, uid: null };   // url null = Liquid Black
 
-    function makeBtn(extra) {
-        const b = document.createElement('button');
-        b.className = 'tv-theme-btn ' + (extra || '');
-        b.title = 'Toggle theme';
-        b.onclick = (e) => { e.stopPropagation(); set(get() === 'dark' ? 'light' : 'dark'); };
-        return b;
+    function apply() {
+        const r = document.documentElement;
+        const has = !!state.url && state.url !== 'none';
+        r.classList.toggle('tv-has-bg', has);
+        r.style.setProperty('--tv-bg', has ? `url("${state.url}")` : 'none');
+        r.style.setProperty('--tv-veil-o', String(Math.max(20, Math.min(100, state.veil || 70)) / 100));
     }
 
-    function updateIcons() {
-        document.querySelectorAll('.tv-theme-btn').forEach(b => b.innerHTML = get() === 'dark' ? sun : moon);
+    async function client() {
+        for (let i = 0; i < 40; i++) {
+            if (window.tvClient) return window.tvClient;
+            await new Promise(res => setTimeout(res, 200));
+        }
+        return null;
     }
 
-    function inject() {
-        const navActions = document.querySelector('.navbar-actions');
-        if (navActions && !navActions.querySelector('.tv-theme-btn')) {
-            navActions.insertBefore(makeBtn(''), navActions.querySelector('.nav-btn-menu'));
-        }
-        const sbHead = document.querySelector('.sidebar-header');
-        if (sbHead && !sbHead.querySelector('.tv-theme-btn')) {
-            sbHead.appendChild(makeBtn('tv-theme-side'));
-        }
-        if (!navActions && !sbHead && !document.querySelector('.tv-theme-float')) {
-            document.body.appendChild(makeBtn('tv-theme-float'));
-        }
-        updateIcons();
+    async function save(patch) {
+        const c = await client(); if (!c || !state.uid) return;
+        await c.from('profiles').update(patch).eq('id', state.uid);
     }
 
-    function applyCharts() {
-        const light = get() === 'light';
-        if (typeof Chart !== 'undefined') Chart.defaults.color = light ? '#5b6070' : '#8a8a93';
+    function studioCard() {
+        if (document.getElementById('tvStudioCard')) return;
+        const settings = document.getElementById('settings');
+        if (!settings) return;
+        const about = [...settings.querySelectorAll('h3')].find(h => /about/i.test(h.textContent));
+        const card = document.createElement('div');
+        card.id = 'tvStudioCard'; card.className = 'card settings-card';
+        card.innerHTML = `<h3>Theme Studio</h3>
+          <div class="tv-studio">
+            <div class="tv-studio-row">
+              <img id="tvBgPrev" class="tv-bg-prev" alt="background preview">
+              <button class="btn btn-secondary" id="tvBgUploadBtn">Upload my image</button>
+              <button class="btn btn-text" id="tvBgResetBtn">Reset to Liquid Black</button>
+            </div>
+            <div class="tv-studio-row">
+              <label style="font-size:.75rem;color:var(--text-secondary);">Overlay darkness (for your image)</label>
+              <input type="range" id="tvVeil" min="20" max="100" step="5" value="${state.veil}">
+              <span id="tvVeilVal" style="font-size:.72rem;color:var(--text-tertiary);">${state.veil}%</span>
+            </div>
+            <p class="tv-studio-note">Default look is Liquid Black glass. Your uploaded background is private to your account — no one else sees it.</p>
+          </div>`;
+        if (about) about.parentElement.before(card); else settings.appendChild(card);
 
-        // theme-aware doughnut center text
-        if (typeof centerTextPlugin !== 'undefined' && !centerTextPlugin.__tvPatched) {
-            centerTextPlugin.__tvPatched = true;
-            centerTextPlugin.afterDraw = function (chart) {
-                if (chart.config.type !== 'doughnut') return;
-                const meta = chart.getDatasetMeta(0);
-                if (!meta.data.length) return;
-                const { ctx } = chart;
-                const x = meta.data[0].x, y = meta.data[0].y;
-                const data = chart.data.datasets[0].data;
-                const total = data.reduce((a, b) => a + b, 0);
-                const pct = total ? Math.round(((data[0] || 0) / total) * 100) : 0;
-                const L = document.documentElement.dataset.theme === 'light';
-                ctx.save();
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.font = "800 22px Inter, sans-serif"; ctx.fillStyle = L ? '#14151c' : '#ffffff';
-                ctx.fillText(pct + '%', x, y - 8);
-                ctx.font = "600 9px Inter, sans-serif"; ctx.fillStyle = L ? '#5b6070' : '#8a8a93';
-                ctx.fillText('WIN RATE', x, y + 12);
-                ctx.restore();
+        const prev = card.querySelector('#tvBgPrev');
+        const syncPrev = () => {
+            const has = !!state.url && state.url !== 'none';
+            prev.style.visibility = has ? 'visible' : 'hidden';
+            if (has) prev.src = state.url;
+        };
+        syncPrev();
+
+        card.querySelector('#tvBgUploadBtn').onclick = () => {
+            const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*';
+            i.onchange = async () => {
+                const f = i.files[0]; if (!f) return;
+                if (f.size > 4 * 1024 * 1024) return showToast('Image too large (max 4MB)', 'warning');
+                showToast('Uploading…');
+                const c = await client(); if (!c) return;
+                const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+                const path = `bg/${state.uid}/${Date.now()}.${ext}`;
+                const { error } = await c.storage.from('backgrounds').upload(path, f, { cacheControl: '3600' });
+                if (error) return showToast('Upload failed: ' + error.message, 'error');
+                const url = c.storage.from('backgrounds').getPublicUrl(path).data.publicUrl;
+                state.url = url; apply(); syncPrev();
+                await save({ bg_url: url });
+                showToast('Your background is live 🎨');
             };
-        }
-
-        // re-render visible charts with new colors
-        if (typeof dashboard !== 'undefined') {
-            const active = document.querySelector('.section.active');
-            if (active && active.id === 'dashboard') dashboard.loadDashboard();
-            if (active && active.id === 'analytics') dashboard.loadAnalytics();
-        }
+            i.click();
+        };
+        card.querySelector('#tvBgResetBtn').onclick = async () => {
+            state.url = null; apply(); syncPrev();
+            await save({ bg_url: null });
+            showToast('Liquid Black restored 🌑');
+        };
+        const veil = card.querySelector('#tvVeil');
+        const val = card.querySelector('#tvVeilVal');
+        veil.oninput = () => { state.veil = parseInt(veil.value, 10); val.textContent = state.veil + '%'; apply(); };
+        veil.onchange = () => save({ bg_veil: state.veil });
     }
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
-    else inject();
-    window.addEventListener('tv-client-ready', inject);
-    applyCharts();
+    async function boot() {
+        const c = await client(); if (!c) return;
+        try {
+            const { data: s } = await c.auth.getSession();
+            if (!s || !s.session) { apply(); return; }
+            state.uid = s.session.user.id;
+            const { data: p } = await c.from('profiles').select('bg_url, bg_veil').eq('id', state.uid).single();
+            if (p) { state.url = p.bg_url || null; state.veil = p.bg_veil == null ? 70 : p.bg_veil; }
+        } catch (e) { /* keep defaults */ }
+        apply();
+        studioCard();
+        new MutationObserver(() => { if (document.getElementById('settings')) studioCard(); }).observe(document.body, { childList: true, subtree: true });
+    }
+    if (document.readyState === 'complete') boot();
+    else window.addEventListener('load', () => setTimeout(boot, 300));
 })();
