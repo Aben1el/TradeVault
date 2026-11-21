@@ -1155,3 +1155,38 @@ body.sb-collapsed .nav-item.active .nav-icon svg {
 [class*="loader-overlay" i],
 [class*="preloader" i],
 [class*="splash-screen" i] { display: none !important; }
+
+/* ============ CINEMATIC BOOT v3 — pure-CSS typewriter, zero flash ============ */
+/* during boot: ambient layers stay hidden so ONLY the word exists */
+body:not(.tv-booted)::before, body:not(.tv-booted)::after { opacity: 0 !important; }
+body.tv-booted::before, body.tv-booted::after { transition: opacity .8s ease .25s; }
+
+/* the word — paints on the very first frame, above everything */
+html::after {
+  content: 'TRADEVAULT';
+  position: fixed; inset: 0; margin: auto;
+  width: 10.8em; height: 1.4em;
+  display: block; overflow: hidden; white-space: nowrap;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 300; text-transform: uppercase;
+  font-size: clamp(1.4rem, 6vw, 3rem);
+  letter-spacing: .42em;
+  color: #D9E0E7;
+  border-right: 2px solid rgba(217,224,231,.8);
+  z-index: 2147483000;
+  pointer-events: none;
+  animation: tvType 1s steps(10, end) .1s both, tvBlink .65s step-end 5;
+  transition: opacity .4s ease, filter .4s ease, transform .4s ease, visibility 0s linear .45s;
+}
+@keyframes tvType { from { width: 0; } to { width: 10.8em; } }
+@keyframes tvBlink { 0%,100% { border-color: rgba(217,224,231,.8); } 50% { border-color: transparent; } }
+html.tv-ready::after { opacity: 0; visibility: hidden; filter: blur(6px); transform: scale(1.05); }
+
+/* the pop when the site appears */
+body.tv-booted #mainContent, body.tv-booted .navbar, body.tv-booted .hero, body.tv-booted .landing {
+  animation: tvPop .55s cubic-bezier(.22,1,.36,1); }
+@keyframes tvPop { from { opacity: 0; transform: scale(.985) translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html::after { animation: none; width: 10.8em; border-color: transparent; }
+}
