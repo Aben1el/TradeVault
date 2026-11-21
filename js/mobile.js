@@ -1,8 +1,14 @@
-// ============ TradeVault Layout & Mobile Perfection Pack v3 ============
+// ============ TradeVault Layout & Mobile Perfection Pack v4 ============
 (function () {
     const st = document.createElement('style');
     st.textContent = `
-        /* ---------- sidebar footer: never clip again ---------- */
+        /* ---------- RESCUE: sidebar top row (brand + theme + collapse) always visible on desktop ---------- */
+        @media (min-width: 769px) {
+          .sidebar > div:first-of-type { display: flex !important; align-items: center; justify-content: space-between; gap: .4rem; padding: .8rem .7rem; }
+        }
+        #tvSbToggle { min-height: 30px; padding: .2rem .55rem; font-size: .85rem; border-radius: 9px; }
+
+        /* ---------- sidebar footer: never clip ---------- */
         .sidebar-footer, .sidebar-bottom, .sidebar > div:last-child {
           padding: .6rem .55rem; display: flex; flex-direction: column; gap: .45rem; }
         .sidebar-footer .btn, .sidebar-bottom .btn, .sidebar > div:last-child .btn {
@@ -48,19 +54,16 @@
         .tv-tile:active { background: rgba(217,224,231,.1); }
         .tv-tile.gold { color: #D9E0E7; border-color: rgba(217,224,231,.4); background: rgba(217,224,231,.08); }
         @media (max-width: 768px) {
-            /* ---------- sidebar OFF on phones ---------- */
             .sidebar { display: none !important; }
             #mainContent, .main-content, main { margin-left: 0 !important; width: 100% !important; padding-left: .85rem !important; padding-right: .85rem !important; }
             body.tv-app-mode { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
             body.tv-app-mode #tvBottomNav { display: grid; }
-            /* ---------- smaller, crisper buttons ---------- */
             .btn { min-height: 38px; padding: .42rem .85rem; font-size: .8rem; border-radius: 10px; }
             .btn-text { min-height: 30px; padding: .25rem .55rem; font-size: .74rem; }
             .filter-btn, .month-btn { min-height: 30px; padding: .26rem .6rem; font-size: .7rem; border-radius: 8px; }
             .table-action-btn { width: 28px; height: 28px; font-size: .75rem; border-radius: 7px; }
             .modal-close { min-height: 30px; padding: .2rem .5rem; }
             input, select, textarea, .form-control { font-size: 16px !important; min-height: 38px; border-radius: 10px; }
-            /* ---------- tighter, cleaner surfaces ---------- */
             .card, .stat-card, .today-card, .chart-container, .trade-card, .calculator-card { padding: .85rem !important; border-radius: 14px !important; }
             .stat-label, .today-label, .m-label { font-size: .58rem !important; letter-spacing: .06em; }
             .stat-value, .today-value { font-size: 1.02rem !important; }
@@ -71,11 +74,9 @@
             .stats-grid, .today-grid { grid-template-columns: repeat(2, 1fr) !important; gap: .55rem !important; }
             .journal-grid, .calculators-grid, .calc-grid, .analytics-full-grid { grid-template-columns: 1fr !important; gap: .6rem !important; }
             .chart-container { height: 230px !important; }
-            /* ---------- tables ---------- */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             #tradesTable { min-width: 620px; font-size: .76rem; }
             #tradesTable td, #tradesTable th { padding: .5rem .55rem; }
-            /* ---------- modals + plans side by side ---------- */
             .modal { width: 94vw !important; max-height: 90vh !important; border-radius: 16px !important; }
             .modal-body { overflow-y: auto; max-height: 62vh; padding: .9rem !important; }
             .modal-footer { position: sticky; bottom: 0; background: var(--bg-secondary); flex-wrap: wrap; gap: .45rem; padding: .7rem .9rem !important; }
@@ -86,7 +87,6 @@
             .plan-price small { font-size: .6rem !important; }
             .plan-feats { font-size: .66rem !important; gap: .26rem !important; margin: .5rem 0 !important; }
             .plan-tag { font-size: .52rem !important; padding: .1rem .42rem !important; top: -8px; right: 8px; }
-            /* ---------- floating bits above the tab bar ---------- */
             .back-btn { bottom: calc(70px + env(safe-area-inset-bottom)) !important; right: .8rem !important; min-height: 32px !important; }
             #toasts, .toast-container, .toasts { bottom: calc(70px + env(safe-area-inset-bottom)) !important; }
             .filters-bar { flex-wrap: wrap; gap: .45rem; }
@@ -170,7 +170,7 @@
         if (back) back.classList.remove('open');
     }
 
-    /* ---------- narrow/collapsed sidebar: footer becomes avatar-only ---------- */
+    /* ---------- narrow/collapsed sidebar handling ---------- */
     function watchSidebar() {
         const sb = document.querySelector('.sidebar');
         if (!sb || sb.__tvNarrowWatched) return;
@@ -180,6 +180,27 @@
         if (window.ResizeObserver) new ResizeObserver(check).observe(sb);
         window.addEventListener('resize', check);
         new MutationObserver(check).observe(sb, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
+
+    /* ---------- rescue: guarantee a visible collapse/expand control ---------- */
+    function restoreTop() {
+        const sb = document.querySelector('.sidebar');
+        if (!sb) return;
+        const row = sb.querySelector(':scope > div:first-of-type');
+        if (!row) return;
+        if (row.querySelector('button')) return;           // original buttons are back — nothing to do
+        if (row.querySelector('#tvSbToggle')) return;
+        const b = document.createElement('button');
+        b.id = 'tvSbToggle'; b.className = 'btn btn-secondary';
+        b.title = 'Expand / collapse sidebar';
+        b.textContent = sb.offsetWidth < 150 ? '»' : '«';
+        b.onclick = () => {
+            const t = sb.querySelector('#collapseBtn, .collapse-btn, #sidebarCollapse, .sidebar-collapse, [title*="ollapse"], [aria-label*="ollapse"]');
+            if (t) t.click();
+            else document.body.classList.toggle('sb-collapsed');
+            setTimeout(() => { b.textContent = sb.offsetWidth < 150 ? '»' : '«'; }, 250);
+        };
+        row.appendChild(b);
     }
 
     function syncNav() {
@@ -198,7 +219,7 @@
         if (inApp === false) closeSheet();
     }
 
-    new MutationObserver(() => syncNav()).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); watchSidebar(); }, 600);
-    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); watchSidebar(); }, 600));
+    new MutationObserver(() => { syncNav(); restoreTop(); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); watchSidebar(); restoreTop(); }, 600);
+    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); watchSidebar(); restoreTop(); }, 600));
 })();
