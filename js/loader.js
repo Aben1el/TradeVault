@@ -3,7 +3,11 @@
     if (window.__tvBootLoaded) return;
     window.__tvBootLoaded = 1;
 
-    (function () { var s = document.createElement('script'); s.src = 'js/themes.js?v=2'; document.head.appendChild(s); })();
+   ['js/themes.js', 'js/sidebar-controller.js'].forEach(function (src) {
+    var s = document.createElement('script');
+    s.src = src + '?v=3';
+    document.head.appendChild(s);
+});
 
     const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const MIN = REDUCED ? 400 : 2300;
