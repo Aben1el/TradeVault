@@ -1,4 +1,4 @@
-// ============ TradeVault Moonstone + Deep Liquid Glass Runtime Patch v6 ============
+// ============ TradeVault Moonstone + Liquid Glass + Cloud Backdrop v7 ============
 (function () {
     if (window.__tvPaletteLoaded) return;   // never run twice
     window.__tvPaletteLoaded = 1;
@@ -16,15 +16,22 @@
         link.href = 'Images/favicon.png?v=6';
     })();
 
-    // ---- 2. DEEP LIQUID GLASS LAYER ----
+    // ---- 2. LIQUID GLASS + CLOUD BACKDROP LAYER ----
     var gl = document.createElement('style');
     gl.textContent = `
-        /* ambient glow — brighter, so the glass has something to refract */
+        /* cloud artwork as fixed backdrop (smooth on iOS — no background-attachment) */
+        body { background: #0B0D10 !important; }
+        body::after { content: ''; position: fixed; inset: 0; z-index: -3; pointer-events: none;
+          background: url('Images/bg-clouds.jpg') center / cover no-repeat; }
+        /* readability veil between clouds and glass */
+        html::before { content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+          background: linear-gradient(180deg, rgba(8,11,15,.62), rgba(8,11,15,.74) 55%, rgba(8,11,15,.84)); }
+        /* ambient orbs drifting above the veil */
         body::before { content: ''; position: fixed; inset: -25%; z-index: -1; pointer-events: none;
           background:
-            radial-gradient(38% 34% at 22% 18%, rgba(217,224,231,.13), transparent 60%),
-            radial-gradient(30% 30% at 78% 32%, rgba(107,115,125,.16), transparent 60%),
-            radial-gradient(36% 38% at 50% 84%, rgba(217,224,231,.09), transparent 60%);
+            radial-gradient(38% 34% at 22% 18%, rgba(217,224,231,.11), transparent 60%),
+            radial-gradient(30% 30% at 78% 32%, rgba(107,115,125,.14), transparent 60%),
+            radial-gradient(36% 38% at 50% 84%, rgba(217,224,231,.08), transparent 60%);
           filter: blur(40px);
           animation: tvDrift 26s ease-in-out infinite alternate; }
         @keyframes tvDrift {
@@ -50,9 +57,24 @@
           background: rgba(217,224,231,.06) !important;
           box-shadow: 0 16px 44px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.12); }
 
-        /* glass shell */
-        .sidebar { background: rgba(11,13,16,.38) !important; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); border-right: 1px solid rgba(217,224,231,.07) !important; }
-        .nav-item.active { background: rgba(217,224,231,.08) !important; border: 1px solid rgba(217,224,231,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+        /* LIQUID GLASS SIDEBAR */
+        .sidebar { background: rgba(10,14,18,.30) !important;
+          backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%);
+          border-right: 1px solid rgba(217,224,231,.10) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 8px 0 32px rgba(0,0,0,.28); }
+        .sidebar .nav-item { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 12px; }
+        .sidebar .nav-item:hover { background: rgba(217,224,231,.07) !important; }
+        .sidebar .nav-item.active { background: rgba(217,224,231,.12) !important;
+          border: 1px solid rgba(217,224,231,.18);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 4px 16px rgba(0,0,0,.25);
+          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .sidebar-footer { background: rgba(10,14,18,.25); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+          border-top: 1px solid rgba(217,224,231,.08); }
+        .sidebar select, .sidebar .acc-current, .sync-pill, .live-sync, .account-switcher {
+          background: rgba(217,224,231,.06) !important; border: 1px solid rgba(217,224,231,.12) !important;
+          backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 12px; }
+
+        /* glass shell: modals, navs */
         .modal { background: rgba(15,18,22,.60) !important; backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
           border: 1px solid rgba(217,224,231,.12) !important; border-radius: 20px;
           box-shadow: 0 40px 100px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10); }
@@ -90,14 +112,15 @@
         @media (max-width: 768px) {
           .card, .stat-card, .today-card, .trade-card, .chart-container, .calculator-card,
           .monthly-item, .recent-row, .smart-insight, .plan-card2 { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+          .sidebar { backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
         }
         @media (prefers-reduced-motion: reduce) {
           body::before { animation: none; }
           .btn::after { display: none; }
         }
 
-        /* Daylight = frosted white glass, same transparency philosophy */
-        html[data-theme="light"] body::before { opacity: .6; }
+        /* Daylight: clouds under a white frost veil */
+        html[data-theme="light"]::before { background: linear-gradient(180deg, rgba(240,244,247,.62), rgba(240,244,247,.74)); }
         html[data-theme="light"] .card, html[data-theme="light"] .stat-card, html[data-theme="light"] .today-card,
         html[data-theme="light"] .trade-card, html[data-theme="light"] .chart-container, html[data-theme="light"] .calculator-card,
         html[data-theme="light"] .monthly-item, html[data-theme="light"] .recent-row, html[data-theme="light"] .smart-insight,
