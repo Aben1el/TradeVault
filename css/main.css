@@ -1282,3 +1282,38 @@ body.tv-ready > *:not(#tv-lux-loader) { opacity: 1 !important; visibility: visib
 
 /* 6. Exit */
 #tv-lux-loader.done { opacity: 0; pointer-events: none; }
+
+/* ============ BOOT v6 — self-contained overlay, ZERO side effects ============ */
+/* neutralize every old hide/dim rule from previous attempts */
+body.tv-loading > *, body.tv-ready > * { opacity: 1 !important; visibility: visible !important; }
+html::after { display: none !important; }
+#tvBootWord, #tvLoader, #tv-lux-loader { display: none !important; }
+
+/* the overlay: sits on top, never touches content */
+#tvBoot {
+  position: fixed; inset: 0; z-index: 2147483000;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(120% 90% at 50% 10%, #10161c 0%, #0B0D10 55%, #07090c 100%);
+  opacity: 1; transition: opacity .7s ease;
+  pointer-events: none;
+}
+#tvBoot.done { opacity: 0; }
+
+/* the word: breathes in, holds, dissolves (static fallback if animation fails) */
+.tvBoot-word {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 200; text-transform: uppercase;
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  color: #D9E0E7; letter-spacing: .4em; padding-left: .4em;
+  opacity: 1;
+  animation: tvBreathe 2.2s cubic-bezier(.25, 1, .5, 1) both;
+}
+@keyframes tvBreathe {
+  0%   { opacity: 0; letter-spacing: -.05em; filter: blur(12px); transform: scale(.96); }
+  35%  { opacity: 1; letter-spacing: .4em;  filter: blur(0);    transform: scale(1); }
+  75%  { opacity: 1; letter-spacing: .4em;  filter: blur(0);    transform: scale(1); }
+  100% { opacity: 0; letter-spacing: .55em; filter: blur(10px); transform: scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tvBoot-word { animation: none; }
+}
