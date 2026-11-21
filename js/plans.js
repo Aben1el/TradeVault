@@ -1,7 +1,13 @@
-// ============ TradeVault Plans: Free vs Pro vs Owner v4 (Chapa) ============
+// ============ TradeVault Plans v6 — monetization PAUSED + identity sync ============
 (function () {
+    const MONETIZATION = false; // ← flip to true when Chapa / payments go live
     const FREE_TRADE_LIMIT = 50;
     const PRICE_LABEL = '3 ETB';
+    const TELEBIRR_NUMBER = '09XXXXXXXX';
+    const TELEBIRR_NAME = 'Abenezer G.';
+    const CONTACT_LINK = 'https://t.me/YOUR_HANDLE';
+    const CONTACT_LABEL = 'Telegram';
+    const PAY_LINK = '';
 
     const FREE_FEATS = [
         { t: 'Up to ' + FREE_TRADE_LIMIT + ' trades', ok: 1 },
@@ -25,6 +31,16 @@
     ];
     const featHTML = list => `<ul class="plan-feats">` + list.map(f => `<li class="${f.ok ? '' : 'no'}">${f.t}</li>`).join('') + `</ul>`;
     const pricePro = () => `<div class="plan-price">3 <small>ETB · one-time (test price)</small></div>`;
+    const manualPanel = `
+        <div style="margin-top:1rem;border:1px dashed rgba(107,115,125,.5);border-radius:12px;padding:.9rem .9rem .8rem;font-size:.78rem;color:var(--text-secondary);background:rgba(217,224,231,.03);">
+          <strong style="color:var(--text-primary);font-size:.8rem;">📱 No card? Pay with telebirr / CBE Birr</strong>
+          <ol style="margin:.5rem 0 0 1.15rem;display:grid;gap:.35rem;">
+            <li>Send <strong>${PRICE_LABEL}</strong> to <strong style="letter-spacing:.05em;">${TELEBIRR_NUMBER}</strong> (${TELEBIRR_NAME})</li>
+            <li>Screenshot the receipt</li>
+            <li>Send receipt + your account email via <a href="${CONTACT_LINK}" target="_blank" rel="noopener" style="color:var(--text-primary);text-decoration:underline;">${CONTACT_LABEL}</a></li>
+            <li>Get your one-time Pro code back and activate it above ⬆️</li>
+          </ol>
+        </div>`;
 
     const st = document.createElement('style');
     st.textContent = `
@@ -53,7 +69,7 @@
     const tvPlan = {
         plan: localStorage.getItem('tv_plan') || 'free',
         hasSession: false,
-        isPro() { return this.plan === 'pro' || this.plan === 'owner'; },
+        isPro() { return MONETIZATION ? (this.plan === 'pro' || this.plan === 'owner') : true; },
 
         async refresh() {
             if (!window.tvClient) return;
@@ -68,7 +84,56 @@
             this.paint();
         },
 
+        /* ---------- IDENTITY SYNC: kills the stale "Aman" cache ---------- */
+        async syncIdentity() {
+            if (!window.tvClient) return;
+            try {
+                const { data: s } = await tvClient.auth.getSession();
+                if (!s || !s.session) return;
+                const { data: p } = await tvClient.from('profiles').select('name').eq('id', s.session.user.id).single();
+                const live = p && p.name;
+                if (live) {
+                    if (live !== localStorage.getItem('tv_name')) localStorage.setItem('tv_name', live);
+                    this.paintName(live);
+                }
+            } catch (e) { /* offline: keep cache */ }
+        },
+        paintName(name) {
+            document.querySelectorAll('.sidebar-footer strong, .sidebar-footer .user-name, #userNameLabel').forEach(el => { if (el) el.textContent = name; });
+            const g = document.getElementById('greetingTitle');
+            if (g && typeof getGreeting === 'function') g.textContent = getGreeting() + ', ' + name;
+        },
+        hookIdentity() {
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#settings .btn-primary, #saveSettingsBtn')) {
+                    setTimeout(() => {
+                        const inp = document.querySelectorAll('#settings input')[0];
+                        const val = inp && inp.value.trim();
+                        if (val) { localStorage.setItem('tv_name', val); this.paintName(val); }
+                    }, 700);
+                }
+                if (e.target.closest('.acc-menu, .acc-option, .account-switcher, #accCurrentBtn')) {
+                    setTimeout(() => this.syncSwitcher(), 500);
+                }
+            }, true);
+        },
+        async syncSwitcher() {
+            if (!window.tvClient) return;
+            const id = localStorage.getItem('tv_active_account_id');
+            if (!id) return;
+            try {
+                const { data: a } = await tvClient.from('trading_accounts').select('name').eq('id', id).single();
+                if (a && a.name) document.querySelectorAll('.acc-current, #accCurrentBtn, .account-switcher .acc-label').forEach(el => { if (el) el.textContent = a.name; });
+            } catch (e) { /* ignore */ }
+        },
+
         paint() {
+            /* monetization paused: scrub every upsell node */
+            if (!MONETIZATION) {
+                ['#tvUpgradeBtn', '#planLine', '#tvPricing'].forEach(sel => { const n = document.querySelector(sel); if (n) n.remove(); });
+                document.querySelectorAll('.sidebar-footer .pro-badge, .sidebar-footer .owner-badge').forEach(b => b.remove());
+                return;
+            }
             const foot = document.querySelector('.sidebar-footer');
             if (foot) {
                 const oldBadge = foot.querySelector('.pro-badge, .owner-badge');
@@ -104,13 +169,15 @@
                         <button class="btn btn-secondary" onclick="location.href='auth.html'">Start Free</button></div>
                       <div class="plan-card2 pro"><span class="plan-tag">MOST POPULAR</span><h4>Pro</h4>${pricePro()}${featHTML(PRO_FEATS)}
                         <button class="btn btn-primary" onclick="tvPlan.showUpgrade()">Get Pro</button></div>
-                    </div>`;
+                    </div>
+                    <p style="font-size:.75rem;color:var(--text-tertiary);margin-top:.6rem;">In Ethiopia? You can also pay via telebirr — steps appear in the upgrade panel after sign-in.</p>`;
                     anchor.before(sec);
                 }
             }
         },
 
         showChooser() {
+            if (!MONETIZATION) return;
             const ov = document.getElementById('modalOverlay');
             if (!ov || ov.classList.contains('active')) return;
             ov.innerHTML = `<div class="modal" style="max-width:660px;">
@@ -136,7 +203,7 @@
             };
         },
 
-        /* ---------- CHAPA ---------- */
+        /* ---------- CHAPA (dormant until MONETIZATION = true) ---------- */
         async chapaPay(btn) {
             if (!window.tvClient || !tvClient.functions) return showToast('Payment system not ready', 'warning');
             if (btn) { btn.disabled = true; btn.textContent = 'Creating checkout…'; }
@@ -167,6 +234,7 @@
         },
 
         showUpgrade(feature) {
+            if (!MONETIZATION) return;
             const ov = document.getElementById('modalOverlay');
             if (!ov || ov.classList.contains('active')) return;
             const pending = localStorage.getItem('tv_chapa_tx');
@@ -183,6 +251,7 @@
                     <button class="btn btn-primary" id="proRedeemBtn">Activate</button>
                   </div>
                 </div>
+                ${manualPanel}
               </div>
               <div class="modal-footer">
                 <button class="btn btn-secondary" id="proVerifyBtn" style="${pending ? '' : 'display:none;'}">I have paid — Verify</button>
@@ -190,7 +259,9 @@
                 <button class="btn btn-primary" id="proBuyBtn">Pay ${PRICE_LABEL} with Chapa</button>
               </div></div>`;
             ov.classList.add('active');
-            document.getElementById('proBuyBtn').onclick = () => this.chapaPay(document.getElementById('proBuyBtn'));
+            const buy = document.getElementById('proBuyBtn');
+            if (PAY_LINK) { buy.textContent = 'Buy Pro online'; buy.onclick = () => window.open(PAY_LINK, '_blank'); }
+            else buy.onclick = () => this.chapaPay(buy);
             document.getElementById('proVerifyBtn').onclick = () => this.chapaVerify();
             document.getElementById('proRedeemBtn').onclick = async () => {
                 const code = document.getElementById('proCodeInput').value.trim().toUpperCase();
@@ -212,8 +283,9 @@
     };
     window.tvPlan = tvPlan;
 
-    /* ---------- enforcement gates ---------- */
+    /* ---------- gates: OFF while monetization paused ---------- */
     function gates() {
+        if (!MONETIZATION) return;
         if (typeof db !== 'undefined' && !db.__planHook) {
             db.__planHook = 1;
             const oa = db.addTrade.bind(db);
@@ -232,25 +304,30 @@
         }
     }
 
-    /* ---------- locks + repaint ---------- */
-    new MutationObserver(() => {
-        gates();
-        const pdf = document.getElementById('wkPdf');
-        if (pdf && !pdf.__gated) {
-            pdf.__gated = 1;
-            pdf.addEventListener('click', e => { if (!tvPlan.isPro()) { e.stopImmediatePropagation(); tvPlan.showUpgrade('PDF exports'); } }, true);
-        }
-        const gc = document.getElementById('gradeChartCard');
-        if (gc && !gc.dataset.locked && !tvPlan.isPro()) {
-            gc.dataset.locked = '1';
-            gc.innerHTML = `<div class="lock-teaser"><div style="font-size:1.6rem;">🔒</div><h3>Grade Analytics is a Pro feature</h3><p style="font-size:.8rem;">See win-rate per trade grade and fix your worst habits first.</p><button class="btn btn-primary" onclick="tvPlan.showUpgrade('Grade analytics')">Unlock with Pro</button></div>`;
-        }
-    }).observe(document.body, { childList: true, subtree: true });
+    /* ---------- locks: OFF while monetization paused ---------- */
+    if (MONETIZATION) {
+        new MutationObserver(() => {
+            gates();
+            const pdf = document.getElementById('wkPdf');
+            if (pdf && !pdf.__gated) {
+                pdf.__gated = 1;
+                pdf.addEventListener('click', e => { if (!tvPlan.isPro()) { e.stopImmediatePropagation(); tvPlan.showUpgrade('PDF exports'); } }, true);
+            }
+            const gc = document.getElementById('gradeChartCard');
+            if (gc && !gc.dataset.locked && !tvPlan.isPro()) {
+                gc.dataset.locked = '1';
+                gc.innerHTML = `<div class="lock-teaser"><div style="font-size:1.6rem;">🔒</div><h3>Grade Analytics is a Pro feature</h3><p style="font-size:.8rem;">See win-rate per trade grade and fix your worst habits first.</p><button class="btn btn-primary" onclick="tvPlan.showUpgrade('Grade analytics')">Unlock with Pro</button></div>`;
+            }
+        }).observe(document.body, { childList: true, subtree: true });
+    }
 
     document.addEventListener('click', () => setTimeout(() => tvPlan.paint(), 150), true);
 
     function boot() {
-        /* Chapa callback: site reopened after payment → auto-verify */
+        tvPlan.syncIdentity();
+        tvPlan.hookIdentity();
+        tvPlan.syncSwitcher();
+        if (!MONETIZATION) { tvPlan.paint(); return; }
         const params = new URLSearchParams(location.search);
         if (params.get('chapa') === '1' || params.get('tx_ref')) {
             const tx = params.get('tx_ref') || localStorage.getItem('tv_chapa_tx');
@@ -271,6 +348,6 @@
     if (typeof dashboard !== 'undefined' && !dashboard.__planHooked) {
         dashboard.__planHooked = 1;
         const od = dashboard.loadDashboard.bind(dashboard);
-        dashboard.loadDashboard = async function () { const r = await od(); tvPlan.paint(); return r; };
+        dashboard.loadDashboard = async function () { const r = await od(); tvPlan.paint(); tvPlan.syncSwitcher(); return r; };
     }
 })();
