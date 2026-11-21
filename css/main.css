@@ -1335,3 +1335,13 @@ body.tv-sb-min #sidebarBrand span,
 body.tv-sb-min #sidebarBrand strong,
 body.tv-sb-min .sidebar .brand-text { display: inline !important; }
 body.tv-sb-min #mainContent, body.tv-sb-min .main-content, body.tv-sb-min main { margin-left: var(--sidebar-width, 260px) !important; }
+
+/* ============ SIDEBAR RESTORE — force full width + all controls visible ============ */
+.sidebar { width: 260px !important; min-width: 260px !important; }
+.sidebar > div:first-of-type { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: .9rem .8rem !important; gap: .5rem !important; }
+.sidebar > div:first-of-type * { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; }
+.sidebar .nav-item { font-size: .82rem !important; }
+.sidebar .nav-item span, .sidebar .nav-item p { display: inline !important; }
+#mainContent, .main-content, main { margin-left: 260px !important; }
+body.tv-sb-min .sidebar, body.sb-collapsed .sidebar, body.collapsed .sidebar { width: 260px !important; }
+body.tv-sb-min #mainContent, body.sb-collapsed #mainContent, body.collapsed #mainContent { margin-left: 260px !important; }
