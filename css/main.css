@@ -1325,3 +1325,33 @@ body.tv-sb-min #sidebarBrand span,
 body.tv-sb-min #sidebarBrand strong,
 body.tv-sb-min .sidebar .brand-text { display: inline !important; }
 body.tv-sb-min #mainContent, body.tv-sb-min .main-content, body.tv-sb-min main { margin-left: var(--sidebar-width, 260px) !important; }
+
+/* ============ SIDEBAR COLLAPSE FIX — floating expand button ============ */
+body.sidebar-collapsed .sidebar::before,
+body.tv-sb-min .sidebar::before,
+.sidebar[data-collapsed="true"]::before {
+  content: '»';
+  position: absolute;
+  top: 12px;
+  right: -18px;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: .9rem;
+  color: var(--text-secondary);
+  z-index: 100;
+  transition: all .2s ease;
+}
+body.sidebar-collapsed .sidebar::before:hover,
+body.tv-sb-min .sidebar::before:hover,
+.sidebar[data-collapsed="true"]::before:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  transform: scale(1.05);
+}
