@@ -1,48 +1,7 @@
-// ============ TradeVault Layout & Mobile Perfection Pack v5 ============
+// ============ TradeVault Mobile Pack v6 — bottom nav + More sheet ONLY ============
 (function () {
     const st = document.createElement('style');
     st.textContent = `
-        /* ---------- desktop sidebar: own collapse system, original look ---------- */
-        @media (min-width: 769px) {
-          /* expanded = like before */
-          body:not(.tv-sb-min) .sidebar { width: var(--sidebar-width, 260px) !important; }
-          body:not(.tv-sb-min) .sidebar .nav-item { font-size: .82rem !important; }
-          body:not(.tv-sb-min) .sidebar .nav-item span:not(.nav-icon),
-          body:not(.tv-sb-min) .sidebar .nav-item p:not(.nav-icon) { display: inline !important; }
-          body:not(.tv-sb-min) #mainContent, body:not(.tv-sb-min) .main-content, body:not(.tv-sb-min) main { margin-left: var(--sidebar-width, 260px) !important; }
-          /* top row always visible, original grouping */
-          .sidebar > div:first-of-type { display: flex !important; align-items: center; gap: .45rem; padding: .9rem .8rem; }
-          .sidebar > div:first-of-type > *:nth-child(2) { margin-left: auto; }
-          /* my round toggle (replaces the dead original) */
-          #tvSbBtn { margin-left: .35rem; width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 1rem; line-height: 1;
-            color: var(--text-secondary); background: var(--bg-tertiary); border: 1px solid var(--border-color); }
-          #tvSbBtn:hover { color: var(--text-primary); border-color: var(--border-hover); }
-          #collapseBtn, .collapse-btn, #sidebarCollapse, .sidebar-collapse { display: none !important; }
-          /* collapsed = clean icon rail */
-          body.tv-sb-min .sidebar { width: 76px !important; }
-          body.tv-sb-min .sidebar .nav-item { justify-content: center; font-size: 0 !important; }
-          body.tv-sb-min .sidebar .nav-item svg { width: 20px; height: 20px; }
-          body.tv-sb-min .sidebar .nav-item span:not(.nav-icon),
-          body.tv-sb-min .sidebar .nav-item p:not(.nav-icon) { display: none !important; }
-          body.tv-sb-min #sidebarBrand span, body.tv-sb-min #sidebarBrand strong,
-          body.tv-sb-min .sidebar .brand-text { display: none !important; }
-          body.tv-sb-min #mainContent, body.tv-sb-min .main-content, body.tv-sb-min main { margin-left: 76px !important; }
-          body.tv-sb-min .sidebar-footer .btn, body.tv-sb-min .sidebar-footer strong,
-          body.tv-sb-min .sidebar-footer small, body.tv-sb-min .sidebar-footer div div { display: none !important; }
-          body.tv-sb-min .sidebar-footer { align-items: center; padding: .6rem .3rem; }
-          body.tv-sb-min .sidebar-footer img { display: block; margin: 0 auto; }
-          body.tv-sb-min .sidebar > div:first-of-type > *:nth-child(2) { margin-left: 0; }
-        }
-
-        /* ---------- sidebar footer: never clip ---------- */
-        .sidebar-footer, .sidebar-bottom, .sidebar > div:last-child {
-          padding: .6rem .55rem; display: flex; flex-direction: column; gap: .45rem; }
-        .sidebar-footer .btn, .sidebar-bottom .btn, .sidebar > div:last-child .btn {
-          width: 100%; white-space: normal; line-height: 1.25; font-size: .7rem;
-          padding: .45rem .5rem; min-height: 34px; text-align: center;
-          overflow: hidden; text-overflow: ellipsis; }
-
         /* ---------- bottom tab bar ---------- */
         #tvBottomNav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; display: none;
           grid-template-columns: repeat(5, 1fr); background: rgba(11,13,16,.50);
@@ -72,6 +31,7 @@
         .tv-tile svg { width: 19px; height: 19px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .tv-tile:active { background: rgba(217,224,231,.1); }
         .tv-tile.gold { color: #D9E0E7; border-color: rgba(217,224,231,.4); background: rgba(217,224,231,.08); }
+        /* ---------- phone layout fixes ---------- */
         @media (max-width: 768px) {
             .sidebar { display: none !important; }
             #mainContent, .main-content, main { margin-left: 0 !important; width: 100% !important; padding-left: .85rem !important; padding-right: .85rem !important; }
@@ -189,26 +149,6 @@
         if (back) back.classList.remove('open');
     }
 
-    /* ---------- our own collapse: round button, persisted, always works ---------- */
-    function setupCollapse() {
-        const sb = document.querySelector('.sidebar');
-        if (!sb || sb.__tvSbBtn) return;
-        const row = sb.querySelector(':scope > div:first-of-type');
-        if (!row) return;
-        sb.__tvSbBtn = 1;
-        if (localStorage.getItem('tv_sb_min') === '1') document.body.classList.add('tv-sb-min');
-        const b = document.createElement('button');
-        b.id = 'tvSbBtn'; b.type = 'button'; b.title = 'Collapse / expand sidebar';
-        const glyph = () => { b.textContent = document.body.classList.contains('tv-sb-min') ? '»' : '«'; };
-        glyph();
-        b.onclick = () => {
-            document.body.classList.toggle('tv-sb-min');
-            localStorage.setItem('tv_sb_min', document.body.classList.contains('tv-sb-min') ? '1' : '0');
-            glyph();
-        };
-        row.appendChild(b);
-    }
-
     function syncNav() {
         const nav = document.getElementById('tvBottomNav');
         if (!nav) return;
@@ -225,7 +165,7 @@
         if (inApp === false) closeSheet();
     }
 
-    new MutationObserver(() => { syncNav(); setupCollapse(); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); setupCollapse(); }, 600);
-    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); setupCollapse(); }, 600));
+    new MutationObserver(() => syncNav()).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); }, 600);
+    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); }, 600));
 })();
