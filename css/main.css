@@ -1190,3 +1190,31 @@ body.tv-booted #mainContent, body.tv-booted .navbar, body.tv-booted .hero, body.
 @media (prefers-reduced-motion: reduce) {
   html::after { animation: none; width: 10.8em; border-color: transparent; }
 }
+/* ============ BOOT v4 — true letter-by-letter typing with riding caret ============ */
+html::after {
+  content: 'TRADEVAULT';           /* fallback: full word if content-animation unsupported */
+  width: 11.5em;
+  text-align: left;
+  border-right: none;
+  animation: tvType 1.3s steps(1, end) .1s both;
+}
+@keyframes tvType {
+  0%   { content: ''; }
+  8%   { content: 'T|'; }
+  16%  { content: 'TR|'; }
+  24%  { content: 'TRA|'; }
+  32%  { content: 'TRAD|'; }
+  40%  { content: 'TRADE|'; }
+  48%  { content: 'TRADEV|'; }
+  56%  { content: 'TRADEVA|'; }
+  64%  { content: 'TRADEVAU|'; }
+  72%  { content: 'TRADEVAUL|'; }
+  80%  { content: 'TRADEVAULT|'; }
+  86%  { content: 'TRADEVAULT'; }
+  91%  { content: 'TRADEVAULT|'; }
+  96%  { content: 'TRADEVAULT'; }
+  100% { content: 'TRADEVAULT'; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html::after { animation: none; content: 'TRADEVAULT'; }
+}
