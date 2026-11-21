@@ -1317,3 +1317,21 @@ html::after { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .tvBoot-word { animation: none; }
 }
+
+/* ============ SIDEBAR TOP ROW — always visible when expanded ============ */
+.sidebar > div:first-of-type { display: flex !important; align-items: center !important; gap: .4rem !important; padding: .8rem .7rem !important; }
+.sidebar > div:first-of-type button,
+.sidebar > div:first-of-type [id*="theme"],
+.sidebar > div:first-of-type [id*="collapse"],
+.sidebar > div:first-of-type [class*="theme"],
+.sidebar > div:first-of-type [class*="collapse"],
+.sidebar > div:first-of-type [title*="ollapse"],
+.sidebar > div:first-of-type [title*="heme"] { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; }
+/* if body still has the stuck class, force expand */
+body.tv-sb-min .sidebar { width: var(--sidebar-width, 260px) !important; }
+body.tv-sb-min .sidebar .nav-item span,
+body.tv-sb-min .sidebar .nav-item p,
+body.tv-sb-min #sidebarBrand span,
+body.tv-sb-min #sidebarBrand strong,
+body.tv-sb-min .sidebar .brand-text { display: inline !important; }
+body.tv-sb-min #mainContent, body.tv-sb-min .main-content, body.tv-sb-min main { margin-left: var(--sidebar-width, 260px) !important; }
