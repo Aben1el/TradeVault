@@ -4,7 +4,7 @@
     window.__tvLoaderLoaded = 1;
 
     const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const MIN_SHOW = REDUCED ? 300 : 1400;   // the word always gets its moment
+    const MIN_SHOW = REDUCED ? 300 : 1600;   // typing (1.4s) + one caret blink
     const born = Date.now();
     let done = false;
 
