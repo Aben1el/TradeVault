@@ -1,4 +1,4 @@
-// ============ TradeVault Sidebar Controller — definitive fix ============
+// ============ TradeVault Sidebar Controller — final ============
 (function () {
     if (window.__tvSidebarController) return;
     window.__tvSidebarController = 1;
@@ -7,39 +7,45 @@
     st.textContent = `
         #tvSidebarControls {
             position: fixed;
-            left: 8px;
+            left: 12px;
             top: 12px;
             z-index: 9999;
             display: flex;
-            gap: 6px;
-            opacity: 0;
+            align-items: center;
+            justify-content: center;
             pointer-events: none;
-            transition: opacity .3s ease;
-        }
-        #tvSidebarControls.visible {
-            opacity: 1;
-            pointer-events: auto;
         }
         #tvSidebarControls button {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             border: 1px solid var(--border-color, rgba(107,115,125,.3));
-            background: var(--bg-secondary, rgba(21,24,28,.8));
+            background: var(--bg-secondary, rgba(21,24,28,.85));
             color: var(--text-secondary, #A6AEB6);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            backdrop-filter: blur(12px);
-            transition: all .2s ease;
+            font-size: 1.05rem;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 4px 16px rgba(0,0,0,.3);
+            transition: opacity .25s ease, transform .25s ease, color .2s ease, border-color .2s ease;
+            opacity: 0;
+            transform: scale(.9);
+            pointer-events: none;
+        }
+        #tvSidebarControls button.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
         }
         #tvSidebarControls button:hover {
             color: var(--text-primary, #D9E0E7);
             border-color: var(--border-hover, #6B737D);
-            transform: scale(1.05);
+            transform: scale(1.06);
         }
+        #tvSidebarControls button:active { transform: scale(.95); }
         @media (max-width: 768px) {
             #tvSidebarControls { display: none !important; }
         }
@@ -57,61 +63,58 @@
     const expandBtn = document.getElementById('tvExpandBtn');
     const themeBtn = document.getElementById('tvThemeBtn');
 
-    // Detect sidebar state
     function isSidebarCollapsed() {
         const sb = document.querySelector('.sidebar');
         if (!sb) return false;
-        const width = sb.offsetWidth;
-        return width > 0 && width < 100;
+        const w = sb.offsetWidth;
+        return w > 0 && w < 120;
     }
 
     function updateControls() {
         const collapsed = isSidebarCollapsed();
-        controls.classList.toggle('visible', collapsed);
+        expandBtn.classList.toggle('show', collapsed);
+        themeBtn.classList.toggle('show', !collapsed);
     }
 
     // Expand handler
     expandBtn.addEventListener('click', () => {
         const sb = document.querySelector('.sidebar');
         if (!sb) return;
-        // Try native collapse button first
-        const nativeBtn = sb.querySelector('button[title*="collapse"], button[title*="expand"], .collapse-btn, #collapseBtn');
-        if (nativeBtn) {
-            nativeBtn.click();
-        } else {
-            // Force expand by removing collapse classes
+        // Try native collapse button
+        const nativeBtn = sb.querySelector('button[title*="collapse"], button[title*="expand"], .collapse-btn, #collapseBtn, #sidebarToggle');
+        if (nativeBtn) { nativeBtn.click(); }
+        else {
             document.body.classList.remove('sidebar-collapsed', 'tv-sb-min', 'collapsed');
             sb.classList.remove('collapsed', 'mini');
             sb.style.width = '';
             localStorage.removeItem('tv_sb_min');
-            localStorage.removeItem('sidebar_state');
             window.dispatchEvent(new Event('resize'));
         }
-        setTimeout(updateControls, 300);
+        setTimeout(updateControls, 350);
     });
 
     // Theme handler
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('tv_theme', theme);
+        themeBtn.textContent = theme === 'light' ? '☀️' : '🌙';
+        // Also notify the app if it has a theme handler
+        if (window.app && typeof app.toggleTheme === 'function') app.toggleTheme();
+    }
     themeBtn.addEventListener('click', () => {
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('tv_theme', next);
-        themeBtn.textContent = next === 'light' ? '☀️' : '🌙';
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        applyTheme(current === 'light' ? 'dark' : 'light');
     });
 
     // Load saved theme
     const savedTheme = localStorage.getItem('tv_theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'light' ? '☀️' : '🌙';
-    }
+    if (savedTheme) applyTheme(savedTheme);
+    else themeBtn.textContent = '🌙';
 
-    // Monitor sidebar state
+    // Monitor
     const observer = new MutationObserver(updateControls);
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
 
-    // Initial check
-    setTimeout(updateControls, 500);
+    setTimeout(updateControls, 400);
     window.addEventListener('resize', updateControls);
 })();
