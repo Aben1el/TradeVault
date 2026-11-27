@@ -1305,17 +1305,6 @@ html::after { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .tvBoot-word { animation: none; }
 }
-/* ============ FINAL FIX: kill old loader + restore native sidebar ============ */
-
-/* 1. Kill the old spinner loader (paints before JS, so CSS must kill it) */
-#loadingScreen, #loader, #loadingOverlay, #splash, #loading,
-.loading-screen, .loader-overlay, .preloader, .splash-screen {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
 /* 2. Native sidebar top row — always visible, always has its buttons */
 .sidebar > div:first-child,
 .sidebar > .sidebar-header,
