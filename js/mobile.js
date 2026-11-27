@@ -1,37 +1,8 @@
-// ============ TradeVault Mobile Pack v6 — bottom nav + More sheet ONLY ============
+// ============ TradeVault Mobile Pack v7 — mobile ONLY ============
 (function () {
     const st = document.createElement('style');
     st.textContent = `
-        /* ---------- bottom tab bar ---------- */
-        #tvBottomNav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; display: none;
-          grid-template-columns: repeat(5, 1fr); background: rgba(11,13,16,.50);
-          backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
-          border-top: 1px solid rgba(217,224,231,.09);
-          padding: .25rem .2rem calc(.25rem + env(safe-area-inset-bottom)); }
-        #tvBottomNav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .12rem;
-          background: none; border: none; color: #6B737D; font: 600 .6rem Inter, sans-serif; letter-spacing: .02em;
-          min-height: 50px; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-        #tvBottomNav button svg { width: 19px; height: 19px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        #tvBottomNav button.active { color: #D9E0E7; }
-        #tvBottomNav button.active svg { stroke-width: 2.4; }
-        /* ---------- more sheet ---------- */
-        #tvSheetBack { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 130; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
-        #tvSheetBack.open { opacity: 1; pointer-events: auto; }
-        #tvSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 131; background: rgba(11,13,16,.66);
-          backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
-          border-top: 1px solid rgba(217,224,231,.35); border-radius: 20px 20px 0 0;
-          transform: translateY(105%); transition: transform .3s cubic-bezier(.22,1,.36,1);
-          padding: .5rem .9rem calc(.9rem + env(safe-area-inset-bottom)); }
-        #tvSheet.open { transform: translateY(0); }
-        .tv-sheet-grip { width: 40px; height: 4px; border-radius: 4px; background: rgba(107,115,125,.5); margin: .3rem auto .7rem; }
-        .tv-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .55rem; }
-        .tv-tile { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: .7rem .3rem;
-          background: rgba(217,224,231,.05); border: 1px solid rgba(107,115,125,.22); border-radius: 14px;
-          color: #A6AEB6; font: 600 .64rem Inter, sans-serif; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-        .tv-tile svg { width: 19px; height: 19px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .tv-tile:active { background: rgba(217,224,231,.1); }
-        .tv-tile.gold { color: #D9E0E7; border-color: rgba(217,224,231,.4); background: rgba(217,224,231,.08); }
-        /* ---------- phone layout fixes ---------- */
+        /* ---------- MOBILE ONLY: bottom nav + more sheet ---------- */
         @media (max-width: 768px) {
             .sidebar { display: none !important; }
             #mainContent, .main-content, main { margin-left: 0 !important; width: 100% !important; padding-left: .85rem !important; padding-right: .85rem !important; }
@@ -71,6 +42,36 @@
             .filters-bar { flex-wrap: wrap; gap: .45rem; }
             .filters-bar select, .filters-bar input { flex: 1 1 46%; min-width: 46%; }
         }
+        @media (min-width: 769px) {
+            #tvBottomNav, #tvSheet, #tvSheetBack { display: none !important; }
+        }
+        #tvBottomNav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; display: none;
+          grid-template-columns: repeat(5, 1fr); background: rgba(11,13,16,.50);
+          backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+          border-top: 1px solid rgba(217,224,231,.09);
+          padding: .25rem .2rem calc(.25rem + env(safe-area-inset-bottom)); }
+        #tvBottomNav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .12rem;
+          background: none; border: none; color: #6B737D; font: 600 .6rem Inter, sans-serif; letter-spacing: .02em;
+          min-height: 50px; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        #tvBottomNav button svg { width: 19px; height: 19px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        #tvBottomNav button.active { color: #D9E0E7; }
+        #tvBottomNav button.active svg { stroke-width: 2.4; }
+        #tvSheetBack { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 130; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+        #tvSheetBack.open { opacity: 1; pointer-events: auto; }
+        #tvSheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 131; background: rgba(11,13,16,.66);
+          backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+          border-top: 1px solid rgba(217,224,231,.35); border-radius: 20px 20px 0 0;
+          transform: translateY(105%); transition: transform .3s cubic-bezier(.22,1,.36,1);
+          padding: .5rem .9rem calc(.9rem + env(safe-area-inset-bottom)); }
+        #tvSheet.open { transform: translateY(0); }
+        .tv-sheet-grip { width: 40px; height: 4px; border-radius: 4px; background: rgba(107,115,125,.5); margin: .3rem auto .7rem; }
+        .tv-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .55rem; }
+        .tv-tile { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: .7rem .3rem;
+          background: rgba(217,224,231,.05); border: 1px solid rgba(107,115,125,.22); border-radius: 14px;
+          color: #A6AEB6; font: 600 .64rem Inter, sans-serif; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        .tv-tile svg { width: 19px; height: 19px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .tv-tile:active { background: rgba(217,224,231,.1); }
+        .tv-tile.gold { color: #D9E0E7; border-color: rgba(217,224,231,.4); background: rgba(217,224,231,.08); }
         @media (max-width: 400px) {
             .stats-grid, .today-grid { grid-template-columns: 1fr !important; }
             .tv-sheet-grid { grid-template-columns: repeat(3, 1fr); }
@@ -125,9 +126,6 @@
             else if (t.dataset.go === 'upgrade') setTimeout(() => window.tvPlan && tvPlan.showUpgrade(), 250);
             else if (typeof app !== 'undefined') setTimeout(() => app.navigateTo(t.dataset.go), 200);
         });
-        document.querySelectorAll('#menuBtn, .menu-btn, #sidebarToggle, .sidebar-toggle, #navToggle, .nav-toggle, #hamburger, .hamburger').forEach(el => {
-            el.addEventListener('click', e => { e.preventDefault(); openSheet(); });
-        });
     }
 
     function openSheet() {
@@ -166,6 +164,6 @@
     }
 
     new MutationObserver(() => syncNav()).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); }, 600);
-    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); }, 600));
+    if (document.readyState === 'complete') setTimeout(() => { buildNav(); syncNav(); }, 400);
+    else window.addEventListener('load', () => setTimeout(() => { buildNav(); syncNav(); }, 400));
 })();
