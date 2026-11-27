@@ -1340,3 +1340,68 @@ body:not(.sidebar-collapsed):not(.tv-sb-min) .main-content,
 body:not(.sidebar-collapsed):not(.tv-sb-min) main {
     margin-left: 240px !important;
 }
+
+/* ============ CLEAN RESET ============ */
+
+/* Kill the old spinner loader */
+#loadingScreen, #loader, #loadingOverlay, #splash, #loading,
+.loading-screen, .loader-overlay, .preloader, .splash-screen,
+#tvBoot, .tvBoot-word {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Force sidebar FULL width with all controls visible */
+.sidebar {
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+}
+
+/* Force top row visible with brand + buttons */
+.sidebar > div:first-child,
+.sidebar > .sidebar-header,
+.sidebar > [class*="header"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: .8rem !important;
+    min-height: 48px !important;
+}
+
+/* Force all buttons in top row visible */
+.sidebar > div:first-child button,
+.sidebar > .sidebar-header button,
+.sidebar button[title*="ollapse"],
+.sidebar button[title*="heme"],
+.sidebar [id*="collapse"],
+.sidebar [id*="theme"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force brand text visible */
+.sidebar .brand-text,
+.sidebar #sidebarBrand,
+.sidebar > div:first-child span,
+.sidebar > div:first-child strong {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force nav labels visible */
+.sidebar .nav-item span,
+.sidebar .nav-item p,
+.sidebar .nav-text {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force main content margin */
+#mainContent, .main-content, main {
+    margin-left: 260px !important;
+}
