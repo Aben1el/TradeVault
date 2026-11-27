@@ -1405,3 +1405,47 @@ body:not(.sidebar-collapsed):not(.tv-sb-min) main {
 #mainContent, .main-content, main {
     margin-left: 260px !important;
 }
+
+/* ============ FINAL SIDEBAR FIX ============ */
+
+/* 1. Hide ALL loaders permanently */
+#loadingScreen, #loader, #loadingOverlay, #splash, #tvBoot, 
+.loading-screen, .loader-overlay, .preloader {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* 2. Force Sidebar Width & Layout */
+.sidebar {
+    width: 260px !important;
+    min-width: 260px !important;
+}
+
+/* 3. Force Top Row to show buttons */
+.sidebar > div:first-child, 
+.sidebar > div:first-of-type {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 1rem !important;
+}
+
+/* 4. Force ANY button in the sidebar to be visible */
+.sidebar button, 
+.sidebar a.btn {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: transparent !important;
+    border: none !important;
+    color: inherit !important;
+    cursor: pointer !important;
+}
+
+/* 5. Fix Main Content Margin */
+#mainContent, .main-content, main {
+    margin-left: 260px !important;
+    width: calc(100% - 260px) !important;
+}
