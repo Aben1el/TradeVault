@@ -1146,17 +1146,6 @@ body.sb-collapsed .nav-item.active .nav-icon svg {
     border-top-color: #5FB4C4 !important;
     background: transparent !important;
 }
-/* ============ OLD SPINNER LOADER RETIRED — cinematic loader owns the boot ============ */
-[id*="loader" i]:not(#tvLoader),
-[id*="loading" i]:not(#tvLoader),
-[id*="preloader" i],
-[id*="splash" i],
-[class*="loading-screen" i],
-[class*="loader-overlay" i],
-[class*="preloader" i],
-[class*="splash-screen" i] { display: none !important; }
-
-/* ============ CINEMATIC BOOT v3 — pure-CSS typewriter, zero flash ============ */
 /* during boot: ambient layers stay hidden so ONLY the word exists */
 body:not(.tv-booted)::before, body:not(.tv-booted)::after { opacity: 0 !important; }
 body.tv-booted::before, body.tv-booted::after { transition: opacity .8s ease .25s; }
@@ -1283,7 +1272,6 @@ body.tv-ready > *:not(#tv-lux-loader) { opacity: 1 !important; visibility: visib
 /* 6. Exit */
 #tv-lux-loader.done { opacity: 0; pointer-events: none; }
 
-/* ============ BOOT v6 — self-contained overlay, ZERO side effects ============ */
 /* neutralize every old hide/dim rule from previous attempts */
 body.tv-loading > *, body.tv-ready > * { opacity: 1 !important; visibility: visible !important; }
 html::after { display: none !important; }
