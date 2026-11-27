@@ -1,11 +1,11 @@
-// ============ TradeVault Mobile Pack — minimal ============
+// TradeVault Mobile — sidebar hidden on phones only
 (function () {
-    const st = document.createElement('style');
-    st.textContent = `
-        @media (max-width: 768px) {
+    if (window.innerWidth <= 768) {
+        const st = document.createElement('style');
+        st.textContent = `
             .sidebar { display: none !important; }
             #mainContent, .main-content, main { margin-left: 0 !important; width: 100% !important; }
-        }
-    `;
-    document.head.appendChild(st);
+        `;
+        document.head.appendChild(st);
+    }
 })();
