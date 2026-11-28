@@ -1449,3 +1449,84 @@ body:not(.sidebar-collapsed):not(.tv-sb-min) main {
     margin-left: 260px !important;
     width: calc(100% - 260px) !important;
 }
+
+/* ============ SIDEBAR COLLAPSE BUTTON FIX ============ */
+
+/* Keep top row visible in BOTH states */
+.sidebar > div:first-child,
+.sidebar > div:first-of-type {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: .8rem !important;
+    min-height: 48px !important;
+}
+
+/* Force the collapse/expand button to ALWAYS be visible */
+.sidebar button[title*="collapse"],
+.sidebar button[title*="expand"],
+.sidebar button[title*="Collapse"],
+.sidebar button[title*="Expand"],
+.sidebar #collapseBtn,
+.sidebar #sidebarToggle,
+.sidebar .collapse-btn,
+.sidebar > div:first-child button:last-child,
+.sidebar > div:first-child button {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+}
+
+/* When collapsed, ensure button stays at top-right */
+body.sidebar-collapsed .sidebar > div:first-child,
+body.tv-sb-min .sidebar > div:first-child {
+    justify-content: center !important;
+}
+
+/* Ensure nav labels hide when collapsed but icons stay */
+body.sidebar-collapsed .sidebar .nav-item span,
+body.tv-sb-min .sidebar .nav-item span,
+body.sidebar-collapsed .sidebar .nav-item p,
+body.tv-sb-min .sidebar .nav-item p {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar .nav-item,
+body.tv-sb-min .sidebar .nav-item {
+    justify-content: center !important;
+}
+
+/* Ensure brand text hides when collapsed */
+body.sidebar-collapsed .sidebar .brand-text,
+body.tv-sb-min .sidebar .brand-text,
+body.sidebar-collapsed .sidebar #sidebarBrand span,
+body.tv-sb-min .sidebar #sidebarBrand span {
+    display: none !important;
+}
+
+/* Footer: hide text when collapsed, keep avatar */
+body.sidebar-collapsed .sidebar-footer .btn,
+body.tv-sb-min .sidebar-footer .btn,
+body.sidebar-collapsed .sidebar-footer strong,
+body.tv-sb-min .sidebar-footer strong,
+body.sidebar-collapsed .sidebar-footer small,
+body.tv-sb-min .sidebar-footer small {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar-footer,
+body.tv-sb-min .sidebar-footer {
+    align-items: center !important;
+    justify-content: center !important;
+}
