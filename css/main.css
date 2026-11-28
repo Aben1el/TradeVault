@@ -1530,3 +1530,91 @@ body.tv-sb-min .sidebar-footer {
     align-items: center !important;
     justify-content: center !important;
 }
+/* ============ SIDEBAR COLLAPSE - CLEAN FIX ============ */
+
+/* Default state: expanded */
+.sidebar {
+    width: 260px !important;
+    transition: width 0.3s ease;
+}
+
+.sidebar > div:first-child {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: .8rem !important;
+}
+
+/* COLLAPSED STATE */
+body.sidebar-collapsed .sidebar,
+body.tv-sb-min .sidebar,
+.sidebar[data-collapsed="true"] {
+    width: 76px !important;
+}
+
+/* Hide brand text when collapsed */
+body.sidebar-collapsed .sidebar .brand-text,
+body.tv-sb-min .sidebar .brand-text,
+body.sidebar-collapsed .sidebar #sidebarBrand,
+body.tv-sb-min .sidebar #sidebarBrand,
+body.sidebar-collapsed .sidebar > div:first-child > span,
+body.tv-sb-min .sidebar > div:first-child > span,
+body.sidebar-collapsed .sidebar > div:first-child > strong,
+body.tv-sb-min .sidebar > div:first-child > strong {
+    display: none !important;
+}
+
+/* Hide nav labels when collapsed */
+body.sidebar-collapsed .sidebar .nav-item span,
+body.tv-sb-min .sidebar .nav-item span,
+body.sidebar-collapsed .sidebar .nav-item p,
+body.tv-sb-min .sidebar .nav-item p,
+body.sidebar-collapsed .sidebar .nav-text,
+body.tv-sb-min .sidebar .nav-text {
+    display: none !important;
+}
+
+/* Center icons when collapsed */
+body.sidebar-collapsed .sidebar .nav-item,
+body.tv-sb-min .sidebar .nav-item {
+    justify-content: center !important;
+    padding: .8rem 0 !important;
+}
+
+/* Center the top row when collapsed */
+body.sidebar-collapsed .sidebar > div:first-child,
+body.tv-sb-min .sidebar > div:first-child {
+    justify-content: center !important;
+}
+
+/* Hide footer text when collapsed */
+body.sidebar-collapsed .sidebar-footer strong,
+body.tv-sb-min .sidebar-footer strong,
+body.sidebar-collapsed .sidebar-footer small,
+body.tv-sb-min .sidebar-footer small,
+body.sidebar-collapsed .sidebar-footer .btn,
+body.tv-sb-min .sidebar-footer .btn {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar-footer,
+body.tv-sb-min .sidebar-footer {
+    justify-content: center !important;
+    padding: .8rem .4rem !important;
+}
+
+/* Adjust main content margin */
+body:not(.sidebar-collapsed):not(.tv-sb-min) #mainContent,
+body:not(.sidebar-collapsed):not(.tv-sb-min) .main-content,
+body:not(.sidebar-collapsed):not(.tv-sb-min) main {
+    margin-left: 260px !important;
+}
+
+body.sidebar-collapsed #mainContent,
+body.tv-sb-min #mainContent,
+body.sidebar-collapsed .main-content,
+body.tv-sb-min .main-content,
+body.sidebar-collapsed main,
+body.tv-sb-min main {
+    margin-left: 76px !important;
+}
